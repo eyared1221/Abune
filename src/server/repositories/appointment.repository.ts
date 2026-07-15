@@ -1,0 +1,3 @@
+export function appointmentRepository() {
+  return {};
+}

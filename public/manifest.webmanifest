@@ -1,0 +1,15 @@
+{
+  "name": "Abune",
+  "short_name": "Abune",
+  "start_url": "/login",
+  "display": "standalone",
+  "background_color": "#f7f8fc",
+  "theme_color": "#123d91",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

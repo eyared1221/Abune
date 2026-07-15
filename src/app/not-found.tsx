@@ -1,0 +1,22 @@
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#f8f9fc] px-6">
+      <div className="max-w-md rounded-3xl border border-[#eadfca] bg-white p-8 text-center shadow-[0_18px_50px_rgba(32,46,92,0.10)]">
+        <h1 className="text-2xl font-extrabold text-[#243453]">
+          Page not found
+        </h1>
+        <p className="mt-3 text-sm text-[#6e7b96]">
+          The page you were looking for does not exist.
+        </p>
+        <Link
+          className="mt-6 inline-flex rounded-full bg-[#123d91] px-5 py-2.5 text-sm font-semibold text-white"
+          href="/login"
+        >
+          Back to login
+        </Link>
+      </div>
+    </div>
+  );
+}
