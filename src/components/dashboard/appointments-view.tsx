@@ -87,6 +87,7 @@ const appointments = [
     typeVariant: "success" as const,
     status: "Today",
     statusVariant: "violet" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -101,6 +102,7 @@ const appointments = [
     typeVariant: "info" as const,
     status: "Today",
     statusVariant: "violet" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -115,6 +117,7 @@ const appointments = [
     typeVariant: "violet" as const,
     status: "Upcoming",
     statusVariant: "warning" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -129,6 +132,7 @@ const appointments = [
     typeVariant: "success" as const,
     status: "Upcoming",
     statusVariant: "warning" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -143,6 +147,7 @@ const appointments = [
     typeVariant: "info" as const,
     status: "Upcoming",
     statusVariant: "warning" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -157,6 +162,7 @@ const appointments = [
     typeVariant: "violet" as const,
     status: "Upcoming",
     statusVariant: "warning" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -171,6 +177,7 @@ const appointments = [
     typeVariant: "success" as const,
     status: "Upcoming",
     statusVariant: "warning" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -185,6 +192,7 @@ const appointments = [
     typeVariant: "violet" as const,
     status: "Completed",
     statusVariant: "success" as const,
+    highlighted: false,
   },
   {
     month: "May",
@@ -199,6 +207,7 @@ const appointments = [
     typeVariant: "info" as const,
     status: "Completed",
     statusVariant: "success" as const,
+    highlighted: false,
   },
 ] as const;
 
