@@ -1,0 +1,329 @@
+{
+  "AddSpiritualChild": {
+    "title": "Add Spiritual Child",
+    "subtitle": "Register a new spiritual child under your guidance.",
+    "sections": {
+      "generalEducational": "1. General & Educational Profile",
+      "spiritualEducation": "2. Spiritual Education Level",
+      "churchSacramental": "3. Church & Sacramental Standing",
+      "spiritualDisciplinePrayer": "4. Spiritual Discipline & Prayer Life",
+      "familySocial": "5. Family & Social History",
+      "selfExamination": "6. Major Spiritual Struggles & Self-Examination",
+      "additionalInformation": "7. Additional Information",
+      "children": "Children",
+      "emergencyContact": "Emergency Contact"
+    },
+    "fields": {
+      "baptismalName": "Baptismal (Christian) Name",
+      "legalName": "Legal / Given Name",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "phoneNumber": "Phone Number",
+      "address": "Address",
+      "occupation": "Current Occupation / Profession",
+      "educationalLevel": "Educational Level",
+      "selectAllThatApply": "Select all that apply",
+      "sundaySchoolYears": "If you are or were a Sunday School student, for how many years?",
+      "abinetDisciplines": "If you completed Abinet education, select the disciplines:",
+      "previousSpiritualFather": "Name of Previous Spiritual Father (Confessor)",
+      "reasonForChangingSpiritualFather": "Reason for Changing Spiritual Father (if applicable)",
+      "receivedPreviousFatherBlessing": "Did you receive your previous Spiritual Father's blessing before transferring?",
+      "placeOfBaptism": "Place of Holy Baptism",
+      "dateOfBaptism": "Date of Baptism",
+      "holyCommunionFrequency": "How frequently do you receive Holy Communion?",
+      "maritalStatus": "Marital Status",
+      "prayerFrequency": "How often do you pray each day?",
+      "prayerBooks": "Which prayer books do you regularly use? (Select all that apply)",
+      "fastingPractice": "Describe your fasting practice",
+      "readsSpiritualBooks": "Do you regularly read the Holy Bible, the Lives of the Saints, or other spiritual books?",
+      "hasDailyProstrationRule": "Do you have a daily rule for prostrations?",
+      "dailyProstrationCount": "If yes, approximately how many prostrations per day?",
+      "faithfullyGivesTithe": "Do you faithfully give your tithe?",
+      "spouseName": "Name of Spouse (Husband/Wife)",
+      "spouseSpiritualFather": "Spiritual Father of Your Spouse (if different)",
+      "childrenNamesAndAges": "Names and Ages of Children (if any)",
+      "greatestFamilyChallenge": "What is the greatest challenge within your family?",
+      "healthStatus": "Health Status (Physical & Mental)",
+      "bodilyTemptations": "Bodily Temptations / Addictions",
+      "spiritualEmotionalStruggles": "Spiritual & Emotional Struggles",
+      "significantFutureDecisions": "Significant Future Life Decisions",
+      "additionalInformation": "Is there anything else you would like your Spiritual Father to know about you?",
+      "joinedDate": "Date You Became a Spiritual Child",
+      "childrenList": "Children List",
+      "childName": "Child Name",
+      "emergencyContactName": "Contact Name",
+      "relationship": "Relationship",
+      "emergencyPhoneNumber": "Emergency Contact Phone Number"
+    },
+    "placeholders": {
+      "baptismalName": "Enter baptismal name",
+      "legalName": "Enter legal / given name",
+      "selectGender": "Select gender",
+      "selectDate": "Select date",
+      "phoneNumber": "0912 345 678",
+      "address": "Enter address",
+      "occupation": "Enter occupation",
+      "selectEducationalLevel": "Select educational level",
+      "sundaySchoolYears": "Enter number of years",
+      "previousSpiritualFather": "Enter spiritual father's name",
+      "reasonForChangingSpiritualFather": "Enter your reason",
+      "placeOfBaptism": "Enter place",
+      "selectFrequency": "Select frequency",
+      "selectMaritalStatus": "Select marital status",
+      "prayerFrequency": "Enter, for example, 2 times or 3 times",
+      "otherPrayerBook": "Please specify",
+      "fastingPractice": "Enter your fasting practice",
+      "dailyProstrationCount": "Enter a number, for example, 50 or 100",
+      "spouseName": "Enter spouse name",
+      "enterName": "Enter name",
+      "availableWhenMarried": "Available when married",
+      "childrenNamesAndAges": "Enter names and ages, for example, Daniel - 10, Maryam - 7",
+      "greatestFamilyChallenge": "Describe the main challenge",
+      "healthStatus": "Enter relevant medical history or conditions",
+      "bodilyTemptations": "Describe any struggles, for example, alcohol or technology",
+      "spiritualEmotionalStruggles": "Describe any struggles, for example, anger, pride, or anxiety",
+      "significantFutureDecisions": "Describe any major decisions you are considering",
+      "additionalInformation": "Share any additional information",
+      "childName": "Enter child name",
+      "selectRelationship": "Select relationship",
+      "contactName": "Enter contact name"
+    },
+    "options": {
+      "common": {
+        "YES": "Yes",
+        "NO": "No"
+      },
+      "gender": {
+        "MALE": "Male",
+        "FEMALE": "Female"
+      },
+      "educationalLevel": {
+        "NON_FORMAL": "Non-formal Education",
+        "PRIMARY": "Primary School",
+        "SECONDARY": "Secondary School",
+        "TVET_DIPLOMA": "TVET / Diploma",
+        "BACHELOR": "Bachelor's Degree",
+        "MASTER": "Master's Degree",
+        "PHD": "PhD"
+      },
+      "spiritualEducation": {
+        "BASIC_CHRISTIAN_EDUCATION_ONLY": "No formal spiritual education (basic Christian education only)",
+        "FORMER_SUNDAY_SCHOOL_STUDENT": "Former Sunday School student",
+        "CURRENT_SUNDAY_SCHOOL_STUDENT": "Current Sunday School student",
+        "CHURCH_COURSES": "Completed short-term or long-term Bible study or church courses",
+        "THEOLOGICAL_COLLEGE": "Theological College Education (Certificate / Diploma / Degree)",
+        "ABINET_EDUCATION": "Completed Abinet (Traditional Church Education)"
+      },
+      "abinetDisciplines": {
+        "ZEMA": "Zema (Liturgical Chant)",
+        "KIDASE": "Kidase (Divine Liturgy)",
+        "QENE": "Qene (Ecclesiastical Poetry)",
+        "SCRIPTURE_INTERPRETATION": "Interpretation of the Holy Scriptures"
+      },
+      "holyCommunionFrequency": {
+        "EVERY_SUNDAY": "Every Sunday",
+        "EVERY_MONTH": "Every Month",
+        "SEVERAL_TIMES_A_YEAR": "Several times a year",
+        "MAJOR_FEASTS_ONLY": "Major Feasts only",
+        "RARELY": "Rarely",
+        "NEVER": "Never"
+      },
+      "maritalStatus": {
+        "SINGLE": "Single",
+        "ORTHODOX_HOLY_MATRIMONY": "Married according to the Orthodox Church Sacrament",
+        "CIVIL_OR_TRADITIONAL_MARRIAGE": "Married through Civil or Traditional Marriage",
+        "DIVORCED": "Divorced",
+        "WIDOWED": "Widowed"
+      },
+      "prayerBooks": {
+        "WUDASE_MARYAM": "Wudase Maryam",
+        "PSALMS": "Psalms",
+        "BOOK_OF_HOURS": "Book of Hours (Se'atāt)",
+        "HOLY_BIBLE": "Holy Bible",
+        "OTHER": "Other"
+      },
+      "relationships": {
+        "PARENT": "Parent",
+        "SIBLING": "Sibling",
+        "SPOUSE": "Spouse",
+        "GUARDIAN": "Guardian",
+        "RELATIVE": "Relative",
+        "FRIEND": "Friend"
+      }
+    },
+    "childrenTable": {
+      "number": "#",
+      "childName": "Child Name",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "actions": "Actions",
+      "emptyTitle": "No children added yet.",
+      "emptyDescription": "Click \"Add Child\" to include a child.",
+      "removeChild": "Remove child {number}"
+    },
+    "buttons": {
+      "addChild": "Add Child",
+      "cancel": "Cancel",
+      "save": "Save Spiritual Child"
+    },
+    "accessibility": {
+      "closeOverlay": "Close add spiritual child form",
+      "closeForm": "Close form"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "invalidPhone": "Enter a valid phone number.",
+      "invalidDate": "Enter a valid date.",
+      "saveFailed": "The spiritual child could not be saved.",
+      "saveSuccess": "The spiritual child was saved successfully."
+    }
+  },
+  "SpiritualChildren": {
+    "page": {
+      "title": "Spiritual Children",
+      "description": "View and manage the spiritual children under your guidance."
+    },
+    "loading": "Loading spiritual children...",
+    "stats": {
+      "overview": "Overview",
+      "total": "Total Spiritual Children",
+      "newThisMonth": "New This Month",
+      "activeThisWeek": "Active This Week",
+      "needFollowUp": "Need Follow-up"
+    },
+    "header": {
+      "title": "Spiritual Children",
+      "description": "View and manage all spiritual children under your guidance.",
+      "addButton": "Add Spiritual Child",
+      "searchPlaceholder": "Search by name or phone number..."
+    },
+    "quickFilters": {
+      "allStatus": "All Status",
+      "selectedStatuses": "{count} statuses",
+      "status": "Status",
+      "allGroups": "All Groups",
+      "selectedGroups": "{count} groups",
+      "group": "Group",
+      "clear": "Clear",
+      "filter": "Filter"
+    },
+    "filters": {
+      "advancedTitle": "Advanced Filters",
+      "advancedDescription": "Filter using registration information.",
+      "selectFields": "Select Fields",
+      "reset": "Reset",
+      "close": "Close filters",
+      "selectFilterFields": "Select Filter Fields",
+      "personalInformation": "Personal Information",
+      "fields": {
+        "baptismalName": "Baptismal Name",
+        "gender": "Gender",
+        "dateOfBirthFrom": "Born From",
+        "dateOfBirthTo": "Born To",
+        "phoneNumber": "Phone Number",
+        "occupation": "Occupation",
+        "educationalLevel": "Educational Level",
+        "maritalStatus": "Marital Status",
+        "spouseName": "Spouse Name",
+        "joinedFrom": "Joined From",
+        "joinedTo": "Joined To",
+        "group": "Group",
+        "status": "Profile Status"
+      },
+      "placeholders": {
+        "name": "Enter name",
+        "phone": "0912...",
+        "occupation": "Enter occupation",
+        "spouseName": "Enter spouse name"
+      },
+      "showingMatching": "Showing {count} matching spiritual children.",
+      "viewResults": "View Results"
+    },
+    "options": {
+      "gender": {
+        "MALE": "Male",
+        "FEMALE": "Female"
+      },
+      "educationalLevel": {
+        "NON_FORMAL": "Non-formal Education",
+        "PRIMARY": "Primary School",
+        "SECONDARY": "Secondary School",
+        "TVET_DIPLOMA": "TVET / Diploma",
+        "BACHELOR": "Bachelor's Degree",
+        "MASTER": "Master's Degree",
+        "PHD": "PhD"
+      },
+      "maritalStatus": {
+        "SINGLE": "Single",
+        "ORTHODOX_HOLY_MATRIMONY": "Married according to the Orthodox Church Sacrament",
+        "CIVIL_OR_TRADITIONAL_MARRIAGE": "Married through Civil or Traditional Marriage",
+        "DIVORCED": "Divorced",
+        "WIDOWED": "Widowed"
+      },
+      "group": {
+        "teens": "Teens",
+        "youngAdults": "Young Adults",
+        "adults": "Adults",
+        "families": "Families"
+      },
+      "status": {
+        "active": "Active",
+        "needsFollowUp": "Needs Follow-up",
+        "inactive": "Inactive"
+      }
+    },
+    "table": {
+      "name": "Name",
+      "contact": "Contact",
+      "group": "Group",
+      "joinedOn": "Joined On",
+      "status": "Status",
+      "actions": "Actions",
+      "age": "Age {age}"
+    },
+    "empty": {
+      "title": "No spiritual children found",
+      "desktopDescription": "Try a different search term or add a new spiritual child.",
+      "mobileDescription": "Try another search or add a new spiritual child."
+    },
+    "actions": {
+      "viewProfile": "View Profile"
+    },
+    "pagination": {
+      "summary": "Showing {from}-{to} of {total} results"
+    },
+    "accessibility": {
+      "viewChild": "View {name}",
+      "moreOptions": "More options for {name}",
+      "closeFilters": "Close filters"
+    },
+    "appointments": {
+      "familyGuidance": "Family Guidance Session",
+      "pastoralIntroduction": "Pastoral Introduction"
+    },
+    "repentance": {
+      "newRegistration": "New Registration",
+      "note": "Recently added and awaiting first pastoral follow-up."
+    },
+    "appointment": {
+      "toBeScheduled": "To be scheduled",
+      "pending": "Pending",
+      "note": "Schedule an introductory follow-up with the spiritual child.",
+      "initialMeeting": "Initial pastoral meeting will be added after review."
+    },
+    "steps": {
+      "registrationCompleted": "Registration completed",
+      "registrationNote": "Profile created successfully from the add child form.",
+      "pastoralWelcome": "Pastoral welcome session",
+      "pastoralNote": "Needs to be scheduled with the spiritual child.",
+      "communionPreparation": "Holy Communion preparation review",
+      "communionNote": "Pending initial spiritual guidance."
+    },
+    "attendance": {
+      "new": "New",
+      "noVisits": "No visits recorded yet",
+      "occupationNoted": "Occupation noted as",
+      "noActivity": "No attendance activity recorded yet."
+    }
+  }
+}

@@ -1,10 +1,12 @@
 "use client";
 
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { authClient } from "@/lib/auth-client";
 
+import { useRouter } from "@/i18n/navigation";
+import type { AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 type LoginFormProps = {
@@ -17,6 +19,7 @@ export function LoginForm({
   redirectTo = "/father",
 }: LoginFormProps) {
   const router = useRouter();
+  const locale = useLocale() as AppLocale;
 
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -74,7 +77,7 @@ const handleSubmit = async (
       return;
     }
 
-    router.replace(redirectTo);
+    router.replace(redirectTo, { locale });
     router.refresh();
   } catch (error) {
     console.error("Sign-in request failed:", error);

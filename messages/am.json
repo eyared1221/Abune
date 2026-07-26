@@ -1,0 +1,329 @@
+{
+  "AddSpiritualChild": {
+    "title": "መንፈሳዊ ልጅ ይመዝግቡ",
+    "subtitle": "በእርስዎ መንፈሳዊ እንክብካቤ ሥር አዲስ መንፈሳዊ ልጅ ይመዝግቡ።",
+    "sections": {
+      "generalEducational": "1. አጠቃላይ እና የትምህርት መረጃ",
+      "spiritualEducation": "2. የመንፈሳዊ ትምህርት ደረጃ",
+      "churchSacramental": "3. የቤተ ክርስቲያንና የቅዱሳት ምስጢራት ተሳትፎ",
+      "spiritualDisciplinePrayer": "4. መንፈሳዊ ተጋድሎ እና የጸሎት ሕይወት",
+      "familySocial": "5. የቤተሰብ እና የማኅበራዊ ሕይወት ታሪክ",
+      "selfExamination": "6. ዋና ዋና መንፈሳዊ ውጊያዎች እና ራስን መመርመር",
+      "additionalInformation": "7. ተጨማሪ መረጃ",
+      "children": "ልጆች",
+      "emergencyContact": "የአደጋ ጊዜ ተጠሪ"
+    },
+    "fields": {
+      "baptismalName": "የክርስትና ስም",
+      "legalName": "የዓለም ስም / የተጸውዖ ስም",
+      "gender": "ፆታ",
+      "dateOfBirth": "የትውልድ ቀን",
+      "phoneNumber": "የስልክ ቁጥር",
+      "address": "አድራሻ",
+      "occupation": "የአሁኑ የሥራ መስክ / ሙያ",
+      "educationalLevel": "የዓለማዊ ትምህርት ደረጃ",
+      "selectAllThatApply": "የሚመለከቱትን ሁሉ ይምረጡ",
+      "sundaySchoolYears": "የሰንበት ትምህርት ቤት ተማሪ ከነበሩ ወይም ከሆኑ፣ ለስንት ዓመታት?",
+      "abinetDisciplines": "የአብነት ትምህርት ካጠናቀቁ፣ የተማሩትን ዘርፎች ይምረጡ።",
+      "previousSpiritualFather": "የቀድሞ የንስሐ አባት ስም",
+      "reasonForChangingSpiritualFather": "የንስሐ አባት ለመቀየር ያስገደደው ምክንያት (ካለ)",
+      "receivedPreviousFatherBlessing": "ከመዛወርዎ በፊት የቀድሞ የንስሐ አባትዎን ቡራኬ ተቀብለዋል?",
+      "placeOfBaptism": "የተጠመቁበት ቦታ",
+      "dateOfBaptism": "የጥምቀት ቀን",
+      "holyCommunionFrequency": "ቅዱስ ቁርባን ምን ያህል ጊዜ ይቀበላሉ?",
+      "maritalStatus": "የጋብቻ ሁኔታ",
+      "prayerFrequency": "በቀን ስንት ጊዜ ይጸልያሉ?",
+      "prayerBooks": "በመደበኛነት የሚጠቀሙባቸው የጸሎት መጻሕፍት የትኞቹ ናቸው? (የሚመለከቱትን ሁሉ ይምረጡ)",
+      "fastingPractice": "የጾም ልምድዎን ይግለጹ",
+      "readsSpiritualBooks": "መጽሐፍ ቅዱስን፣ ገድለ ቅዱሳንን ወይም ሌሎች መንፈሳዊ መጻሕፍትን በመደበኛነት ያነባሉ?",
+      "hasDailyProstrationRule": "በየቀኑ የተወሰነ የስግደት ቁጥር አለዎት?",
+      "dailyProstrationCount": "አዎ ከሆነ፣ በቀን በግምት ስንት ጊዜ ይሰግዳሉ?",
+      "faithfullyGivesTithe": "አሥራትዎን በታማኝነት ያወጣሉ?",
+      "spouseName": "የሕይወት አጋር (ባል/ሚስት) ስም",
+      "spouseSpiritualFather": "የትዳር አጋርዎ የንስሐ አባት (ሌላ ከሆነ)",
+      "childrenNamesAndAges": "የልጆች ስም እና ዕድሜ (ካሉ)",
+      "greatestFamilyChallenge": "በቤተሰብዎ ውስጥ ያለው ትልቁ ፈተና ምንድን ነው?",
+      "healthStatus": "የጤና ሁኔታ (አካላዊና አእምሯዊ)",
+      "bodilyTemptations": "የሥጋ ፈተናዎች / የሱስ ችግሮች",
+      "spiritualEmotionalStruggles": "መንፈሳዊና ስሜታዊ ፈተናዎች",
+      "significantFutureDecisions": "የወደፊት ትልልቅ የሕይወት ውሳኔዎች",
+      "additionalInformation": "የንስሐ አባትዎ ስለ እርስዎ እንዲያውቁት የሚፈልጉት ሌላ መረጃ አለ?",
+      "joinedDate": "መንፈሳዊ ልጅ ሆነው የተቀላቀሉበት ቀን",
+      "childrenList": "የልጆች ዝርዝር",
+      "childName": "የልጅ ስም",
+      "emergencyContactName": "የተጠሪ ስም",
+      "relationship": "ዝምድና",
+      "emergencyPhoneNumber": "የአደጋ ጊዜ ተጠሪ ስልክ ቁጥር"
+    },
+    "placeholders": {
+      "baptismalName": "የክርስትና ስም ያስገቡ",
+      "legalName": "የዓለም ስም ያስገቡ",
+      "selectGender": "ፆታ ይምረጡ",
+      "selectDate": "ቀን ይምረጡ",
+      "phoneNumber": "0912 345 678",
+      "address": "አድራሻ ያስገቡ",
+      "occupation": "የሥራ መስክዎን ወይም ሙያዎን ያስገቡ",
+      "selectEducationalLevel": "የትምህርት ደረጃ ይምረጡ",
+      "sundaySchoolYears": "የዓመታት ብዛት ያስገቡ",
+      "previousSpiritualFather": "የቀድሞ የንስሐ አባት ስም ያስገቡ",
+      "reasonForChangingSpiritualFather": "ምክንያቱን ያስገቡ",
+      "placeOfBaptism": "ቦታውን ያስገቡ",
+      "selectFrequency": "ድግግሞሹን ይምረጡ",
+      "selectMaritalStatus": "የጋብቻ ሁኔታ ይምረጡ",
+      "prayerFrequency": "ለምሳሌ፣ 2 ጊዜ ወይም 3 ጊዜ ያስገቡ",
+      "otherPrayerBook": "እባክዎ ይግለጹ",
+      "fastingPractice": "የጾም ልምድዎን ያስገቡ",
+      "dailyProstrationCount": "ለምሳሌ፣ 50 ወይም 100 ያስገቡ",
+      "spouseName": "የትዳር አጋር ስም ያስገቡ",
+      "enterName": "ስም ያስገቡ",
+      "availableWhenMarried": "ባለትዳር ሲሆኑ ይህ መስክ ይከፈታል",
+      "childrenNamesAndAges": "ስሞችንና ዕድሜዎችን ያስገቡ፤ ለምሳሌ፣ ዳንኤል - 10፣ ማርያም - 7",
+      "greatestFamilyChallenge": "ዋናውን የቤተሰብ ፈተና ይግለጹ",
+      "healthStatus": "አስፈላጊ የሕክምና ታሪክ ወይም የጤና ሁኔታ ያስገቡ",
+      "bodilyTemptations": "ለምሳሌ፣ አልኮል፣ ሱስ ወይም ቴክኖሎጂ ጋር ያለዎትን ፈተና ይግለጹ",
+      "spiritualEmotionalStruggles": "ለምሳሌ፣ ቁጣ፣ ትዕቢት ወይም ጭንቀት ያሉ ፈተናዎችን ይግለጹ",
+      "significantFutureDecisions": "እያሰቡባቸው ያሉ ትልልቅ ውሳኔዎችን ይግለጹ",
+      "additionalInformation": "ተጨማሪ መረጃ ያካፍሉ",
+      "childName": "የልጅ ስም ያስገቡ",
+      "selectRelationship": "ዝምድና ይምረጡ",
+      "contactName": "የተጠሪ ስም ያስገቡ"
+    },
+    "options": {
+      "common": {
+        "YES": "አዎ",
+        "NO": "አይ"
+      },
+      "gender": {
+        "MALE": "ወንድ",
+        "FEMALE": "ሴት"
+      },
+      "educationalLevel": {
+        "NON_FORMAL": "መደበኛ ያልሆነ ትምህርት",
+        "PRIMARY": "የመጀመሪያ ደረጃ",
+        "SECONDARY": "የሁለተኛ ደረጃ",
+        "TVET_DIPLOMA": "ቲቪኢቲ / ዲፕሎማ",
+        "BACHELOR": "የመጀመሪያ ዲግሪ",
+        "MASTER": "የሁለተኛ ዲግሪ",
+        "PHD": "ፒኤችዲ"
+      },
+      "spiritualEducation": {
+        "BASIC_CHRISTIAN_EDUCATION_ONLY": "ምንም መደበኛ የመንፈሳዊ ትምህርት የሌለው (መሠረታዊ የክርስትና ትምህርት ብቻ)",
+        "FORMER_SUNDAY_SCHOOL_STUDENT": "የሰንበት ትምህርት ቤት ተማሪ የነበረ",
+        "CURRENT_SUNDAY_SCHOOL_STUDENT": "በሰንበት ትምህርት ቤት እየተማረ ያለ",
+        "CHURCH_COURSES": "የአጭር ወይም የረጅም ጊዜ የመጽሐፍ ቅዱስ ጥናት ወይም የቤተ ክርስቲያን ኮርሶችን ያጠና",
+        "THEOLOGICAL_COLLEGE": "የመንፈሳዊ ኮሌጅ ትምህርት (ሰርተፊኬት / ዲፕሎማ / ዲግሪ)",
+        "ABINET_EDUCATION": "የአብነት ትምህርት ያጠና"
+      },
+      "abinetDisciplines": {
+        "ZEMA": "ዜማ",
+        "KIDASE": "ቅዳሴ",
+        "QENE": "ቅኔ",
+        "SCRIPTURE_INTERPRETATION": "መጻሕፍት ትርጓሜ"
+      },
+      "holyCommunionFrequency": {
+        "EVERY_SUNDAY": "ሁልጊዜ እሑድ",
+        "EVERY_MONTH": "በየወሩ",
+        "SEVERAL_TIMES_A_YEAR": "በዓመት ጥቂት ጊዜ",
+        "MAJOR_FEASTS_ONLY": "በዓበይት በዓላት ብቻ",
+        "RARELY": "አልፎ አልፎ",
+        "NEVER": "በጭራሽ"
+      },
+      "maritalStatus": {
+        "SINGLE": "ያላገባ/ች",
+        "ORTHODOX_HOLY_MATRIMONY": "በቤተ ክርስቲያን ሥርዓት ያገባ/ች",
+        "CIVIL_OR_TRADITIONAL_MARRIAGE": "በሲቪል ወይም በባህል ያገባ/ች",
+        "DIVORCED": "የፈታ/ች",
+        "WIDOWED": "ባል ወይም ሚስት የሞተበት/ባት"
+      },
+      "prayerBooks": {
+        "WUDASE_MARYAM": "ውዳሴ ማርያም",
+        "PSALMS": "መዝሙረ ዳዊት",
+        "BOOK_OF_HOURS": "ሰዓታት",
+        "HOLY_BIBLE": "መጽሐፍ ቅዱስ",
+        "OTHER": "ሌላ"
+      },
+      "relationships": {
+        "PARENT": "ወላጅ",
+        "SIBLING": "ወንድም / እህት",
+        "SPOUSE": "ባል / ሚስት",
+        "GUARDIAN": "አሳዳጊ",
+        "RELATIVE": "ዘመድ",
+        "FRIEND": "ጓደኛ"
+      }
+    },
+    "childrenTable": {
+      "number": "#",
+      "childName": "የልጅ ስም",
+      "gender": "ፆታ",
+      "dateOfBirth": "የትውልድ ቀን",
+      "actions": "ተግባሮች",
+      "emptyTitle": "እስካሁን ምንም ልጅ አልተጨመረም።",
+      "emptyDescription": "ልጅ ለማካተት “ልጅ ጨምር”ን ይጫኑ።",
+      "removeChild": "ልጅ {number}ን ያስወግዱ"
+    },
+    "buttons": {
+      "addChild": "ልጅ ጨምር",
+      "cancel": "ይቅር",
+      "save": "መንፈሳዊ ልጁን ያስቀምጡ"
+    },
+    "accessibility": {
+      "closeOverlay": "የመንፈሳዊ ልጅ ማስገቢያ ቅጹን ዝጋ",
+      "closeForm": "ቅጹን ዝጋ"
+    },
+    "validation": {
+      "required": "ይህ መስክ ያስፈልጋል።",
+      "invalidPhone": "ትክክለኛ የስልክ ቁጥር ያስገቡ።",
+      "invalidDate": "ትክክለኛ ቀን ያስገቡ።",
+      "saveFailed": "የመንፈሳዊ ልጁን መረጃ ማስቀመጥ አልተቻለም።",
+      "saveSuccess": "የመንፈሳዊ ልጁ መረጃ በተሳካ ሁኔታ ተቀምጧል።"
+    }
+  },
+  "SpiritualChildren": {
+    "page": {
+      "title": "መንፈሳዊ ልጆች",
+      "description": "በመንፈሳዊ እንክብካቤዎ ሥር ያሉ መንፈሳዊ ልጆችን ይመልከቱ እና ያስተዳድሩ።"
+    },
+    "loading": "የመንፈሳዊ ልጆች መረጃ በመጫን ላይ...",
+    "stats": {
+      "overview": "አጠቃላይ",
+      "total": "ጠቅላላ መንፈሳዊ ልጆች",
+      "newThisMonth": "በዚህ ወር የተጨመሩ",
+      "activeThisWeek": "በዚህ ሳምንት ንቁ የሆኑ",
+      "needFollowUp": "ክትትል የሚያስፈልጋቸው"
+    },
+    "header": {
+      "title": "መንፈሳዊ ልጆች",
+      "description": "በመንፈሳዊ እንክብካቤዎ ሥር ያሉ መንፈሳዊ ልጆችን ይመልከቱ እና ያስተዳድሩ።",
+      "addButton": "መንፈሳዊ ልጅ ጨምር",
+      "searchPlaceholder": "በስም ወይም በስልክ ቁጥር ይፈልጉ..."
+    },
+    "quickFilters": {
+      "allStatus": "ሁሉም ሁኔታዎች",
+      "selectedStatuses": "{count} ሁኔታዎች",
+      "status": "ሁኔታ",
+      "allGroups": "ሁሉም ቡድኖች",
+      "selectedGroups": "{count} ቡድኖች",
+      "group": "ቡድን",
+      "clear": "አጽዳ",
+      "filter": "ማጣሪያ"
+    },
+    "filters": {
+      "advancedTitle": "የላቀ ማጣሪያ",
+      "advancedDescription": "በምዝገባ መረጃ መሠረት ያጣሩ።",
+      "selectFields": "መስኮችን ይምረጡ",
+      "reset": "ዳግም አስጀምር",
+      "close": "ማጣሪያውን ዝጋ",
+      "selectFilterFields": "የማጣሪያ መስኮችን ይምረጡ",
+      "personalInformation": "የግል መረጃ",
+      "fields": {
+        "baptismalName": "የክርስትና ስም",
+        "gender": "ፆታ",
+        "dateOfBirthFrom": "የትውልድ ቀን ከ",
+        "dateOfBirthTo": "የትውልድ ቀን እስከ",
+        "phoneNumber": "የስልክ ቁጥር",
+        "occupation": "ሙያ",
+        "educationalLevel": "የትምህርት ደረጃ",
+        "maritalStatus": "የጋብቻ ሁኔታ",
+        "spouseName": "የትዳር አጋር ስም",
+        "joinedFrom": "የተቀላቀሉበት ቀን ከ",
+        "joinedTo": "የተቀላቀሉበት ቀን እስከ",
+        "group": "ቡድን",
+        "status": "የመገለጫ ሁኔታ"
+      },
+      "placeholders": {
+        "name": "ስም ያስገቡ",
+        "phone": "0912...",
+        "occupation": "ሙያ ያስገቡ",
+        "spouseName": "የትዳር አጋር ስም ያስገቡ"
+      },
+      "showingMatching": "{count} የሚዛመዱ መንፈሳዊ ልጆች ታይተዋል።",
+      "viewResults": "ውጤቶችን ይመልከቱ"
+    },
+    "options": {
+      "gender": {
+        "MALE": "ወንድ",
+        "FEMALE": "ሴት"
+      },
+      "educationalLevel": {
+        "NON_FORMAL": "መደበኛ ያልሆነ ትምህርት",
+        "PRIMARY": "የመጀመሪያ ደረጃ",
+        "SECONDARY": "የሁለተኛ ደረጃ",
+        "TVET_DIPLOMA": "ቲቪኢቲ / ዲፕሎማ",
+        "BACHELOR": "የመጀመሪያ ዲግሪ",
+        "MASTER": "የሁለተኛ ዲግሪ",
+        "PHD": "ፒኤችዲ"
+      },
+      "maritalStatus": {
+        "SINGLE": "ያላገባ/ች",
+        "ORTHODOX_HOLY_MATRIMONY": "በቤተ ክርስቲያን ሥርዓት ያገባ/ች",
+        "CIVIL_OR_TRADITIONAL_MARRIAGE": "በሲቪል ወይም በባህል ያገባ/ች",
+        "DIVORCED": "የፈታ/ች",
+        "WIDOWED": "ባል ወይም ሚስት የሞተበት/ባት"
+      },
+      "group": {
+        "teens": "ታዳጊዎች",
+        "youngAdults": "ወጣቶች",
+        "adults": "አዋቂዎች",
+        "families": "ቤተሰቦች"
+      },
+      "status": {
+        "active": "ንቁ",
+        "needsFollowUp": "ክትትል ያስፈልገዋል",
+        "inactive": "ንቁ ያልሆነ"
+      }
+    },
+    "table": {
+      "name": "ስም",
+      "contact": "ስልክ",
+      "group": "ቡድን",
+      "joinedOn": "የተቀላቀሉበት ቀን",
+      "status": "ሁኔታ",
+      "actions": "ተግባሮች",
+      "age": "ዕድሜ {age}"
+    },
+    "empty": {
+      "title": "ምንም መንፈሳዊ ልጅ አልተገኘም",
+      "desktopDescription": "የተለየ የፍለጋ ቃል ይሞክሩ ወይም አዲስ መንፈሳዊ ልጅ ይጨምሩ።",
+      "mobileDescription": "ሌላ ፍለጋ ይሞክሩ ወይም አዲስ መንፈሳዊ ልጅ ይጨምሩ።"
+    },
+    "actions": {
+      "viewProfile": "መገለጫውን ይመልከቱ"
+    },
+    "pagination": {
+      "summary": "ከ{from}-{to} ከጠቅላላ {total} ውጤቶች ታይተዋል"
+    },
+    "accessibility": {
+      "viewChild": "{name}ን ይመልከቱ",
+      "moreOptions": "ለ{name} ተጨማሪ አማራጮች",
+      "closeFilters": "ማጣሪያዎችን ዝጋ"
+    },
+    "appointments": {
+      "familyGuidance": "የቤተሰብ መመሪያ ክፍለ ጊዜ",
+      "pastoralIntroduction": "የንስሐ አባት ማስተዋወቂያ"
+    },
+    "repentance": {
+      "newRegistration": "አዲስ ምዝገባ",
+      "note": "በቅርብ ጊዜ ተጨምሯል እና የመጀመሪያ የንስሐ አባት ተከታታይ ይጠባበቃል።"
+    },
+    "appointment": {
+      "toBeScheduled": "መደበኛ ይጠበቅ",
+      "pending": "በመጠባበቅ ላይ",
+      "note": "ከመንፈሳዊ ልጅ ጋር የመጀመሪያ ተከታታይ ይቀጠሩ።",
+      "initialMeeting": "የመጀመሪያ የንስሐ አባት ስብሰባ ከግምገማ በኋላ ይጨምራል።"
+    },
+    "steps": {
+      "registrationCompleted": "ምዝገባ ተጠናቅቋል",
+      "registrationNote": "መገለጫ በተሳካ ሁኔታ ከመንፈሳዊ ልጅ ቅጽል ቅጽ ተፈጥሯል።",
+      "pastoralWelcome": "የንስሐ አባት ወደነበረ ክፍለ ጊዜ",
+      "pastoralNote": "ከመንፈሳዊ ልጅ ጋር መደበኛ መጠበቅ ያስፈልጋል።",
+      "communionPreparation": "የቅዱስ ቁርባን ዝግጅት ግምገማ",
+      "communionNote": "የመጀመሪያ የመንፈሳዊ መመሪያ በመጠባበቅ ላይ።"
+    },
+    "attendance": {
+      "new": "አዲስ",
+      "noVisits": "ምንም ጉብኝት አልተመዘገበም",
+      "occupationNoted": "የሥራ መስክ ተመዝግቧል",
+      "noActivity": "ምንም የተገኘ ተከታታይ እንቅስቃሴ የለም።"
+    }
+  }
+}

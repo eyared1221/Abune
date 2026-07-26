@@ -1,0 +1,512 @@
+{
+  "id": "a74a739c-af23-4616-a981-a28ee6fea1ec",
+  "prevId": "953db045-4f47-4d39-bdbc-d276ffc59ad2",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.spiritual_child_family_children": {
+      "name": "spiritual_child_family_children",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "spiritual_child_id": {
+          "name": "spiritual_child_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gender": {
+          "name": "gender",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "spiritual_child_family_children_child_idx": {
+          "name": "spiritual_child_family_children_child_idx",
+          "columns": [
+            {
+              "expression": "spiritual_child_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "spiritual_child_family_children_spiritual_child_id_spiritual_children_id_fk": {
+          "name": "spiritual_child_family_children_spiritual_child_id_spiritual_children_id_fk",
+          "tableFrom": "spiritual_child_family_children",
+          "tableTo": "spiritual_children",
+          "columnsFrom": [
+            "spiritual_child_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.spiritual_child_private_intake": {
+      "name": "spiritual_child_private_intake",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "spiritual_child_id": {
+          "name": "spiritual_child_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "greatest_family_challenge": {
+          "name": "greatest_family_challenge",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "health_status": {
+          "name": "health_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bodily_temptations": {
+          "name": "bodily_temptations",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "spiritual_emotional_struggles": {
+          "name": "spiritual_emotional_struggles",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "significant_future_decisions": {
+          "name": "significant_future_decisions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "additional_information": {
+          "name": "additional_information",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "spiritual_child_private_intake_child_unique": {
+          "name": "spiritual_child_private_intake_child_unique",
+          "columns": [
+            {
+              "expression": "spiritual_child_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "spiritual_child_private_intake_spiritual_child_id_spiritual_children_id_fk": {
+          "name": "spiritual_child_private_intake_spiritual_child_id_spiritual_children_id_fk",
+          "tableFrom": "spiritual_child_private_intake",
+          "tableTo": "spiritual_children",
+          "columnsFrom": [
+            "spiritual_child_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.spiritual_children": {
+      "name": "spiritual_children",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "father_user_id": {
+          "name": "father_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "linked_user_id": {
+          "name": "linked_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(180)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "baptismal_name": {
+          "name": "baptismal_name",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "legal_name": {
+          "name": "legal_name",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gender": {
+          "name": "gender",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "occupation": {
+          "name": "occupation",
+          "type": "varchar(180)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "educational_level": {
+          "name": "educational_level",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "spiritual_education": {
+          "name": "spiritual_education",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sunday_school_years": {
+          "name": "sunday_school_years",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "abinet_disciplines": {
+          "name": "abinet_disciplines",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previous_spiritual_father": {
+          "name": "previous_spiritual_father",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason_for_changing_spiritual_father": {
+          "name": "reason_for_changing_spiritual_father",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "received_previous_father_blessing": {
+          "name": "received_previous_father_blessing",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "place_of_baptism": {
+          "name": "place_of_baptism",
+          "type": "varchar(240)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_of_baptism": {
+          "name": "date_of_baptism",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "holy_communion_frequency": {
+          "name": "holy_communion_frequency",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prayer_frequency": {
+          "name": "prayer_frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prayer_books": {
+          "name": "prayer_books",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "other_prayer_book": {
+          "name": "other_prayer_book",
+          "type": "varchar(240)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fasting_practice": {
+          "name": "fasting_practice",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reads_spiritual_books": {
+          "name": "reads_spiritual_books",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "has_daily_prostration_rule": {
+          "name": "has_daily_prostration_rule",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "daily_prostration_count": {
+          "name": "daily_prostration_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "faithfully_gives_tithe": {
+          "name": "faithfully_gives_tithe",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "marital_status": {
+          "name": "marital_status",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spiritual_child_joined_date": {
+          "name": "spiritual_child_joined_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spouse_name": {
+          "name": "spouse_name",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "spouse_spiritual_father": {
+          "name": "spouse_spiritual_father",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "children_names_and_ages": {
+          "name": "children_names_and_ages",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "spiritual_children_father_slug_unique": {
+          "name": "spiritual_children_father_slug_unique",
+          "columns": [
+            {
+              "expression": "father_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "spiritual_children_father_idx": {
+          "name": "spiritual_children_father_idx",
+          "columns": [
+            {
+              "expression": "father_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "spiritual_children_phone_idx": {
+          "name": "spiritual_children_phone_idx",
+          "columns": [
+            {
+              "expression": "phone_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "spiritual_children_joined_idx": {
+          "name": "spiritual_children_joined_idx",
+          "columns": [
+            {
+              "expression": "spiritual_child_joined_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

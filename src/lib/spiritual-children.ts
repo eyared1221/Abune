@@ -9,7 +9,7 @@ export type SpiritualChild = {
   initials: string;
   name: string;
   age: number;
-  gender: "Male" | "Female";
+  gender: "Male" | "Female" | "MALE" | "FEMALE";
   contact: string;
   guardian: string;
   group: string;

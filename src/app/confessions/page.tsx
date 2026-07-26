@@ -1,14 +1,7 @@
-import { ConfessionsView } from "@/components/dashboard/confessions-view";
-import { PortalShell } from "@/components/dashboard/portal-shell";
+import { redirect } from "next/navigation";
+
+import { routing } from "@/i18n/routing";
 
 export default function ConfessionsPage() {
-  return (
-    <PortalShell
-      currentPath="/confessions"
-      title="Confessions"
-      description="Review confession requests, manage appointments, and keep spiritual records."
-    >
-      <ConfessionsView />
-    </PortalShell>
-  );
+  redirect(`/${routing.defaultLocale}/confessions`);
 }

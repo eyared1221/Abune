@@ -1,0 +1,11 @@
+src/db/schema/availability.ts
+src/db/schema/appointments.ts
+src/db/schema/index.ts
+src/types/availability.ts
+src/lib/validators/availability.ts
+src/server/repositories/availability.repository.ts
+src/server/services/availability.service.ts
+src/server/actions/availability.actions.ts
+src/components/dashboard/calendar-view.tsx
+src/components/dashboard/new-appointment-modal.tsx
+README.md

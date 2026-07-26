@@ -1,41 +1,28 @@
+import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-const useDirectConnection =
-  process.env.DB_USE_DIRECT === "true";
+import * as schema from "@/db/schema";
 
-function isPlaceholderConnectionString(
-  value: string,
-) {
+const useDirectConnection = process.env.DB_USE_DIRECT === "true";
+
+function isPlaceholderConnectionString(value: string) {
   try {
-    return new URL(value).hostname.includes(
-      "example",
-    );
+    return new URL(value).hostname.includes("example");
   } catch {
     return false;
   }
 }
 
-function normalizeConnectionString(
-  value: string,
-) {
+function normalizeConnectionString(value: string) {
   const url = new URL(value);
-  const sslMode =
-    url.searchParams.get("sslmode");
+  const sslMode = url.searchParams.get("sslmode");
 
   if (
     sslMode &&
-    ["prefer", "require", "verify-ca"].includes(
-      sslMode,
-    ) &&
-    url.searchParams.get("uselibpqcompat") !==
-      "true"
+    ["prefer", "require", "verify-ca"].includes(sslMode) &&
+    url.searchParams.get("uselibpqcompat") !== "true"
   ) {
-    // Preserve pg's current secure behavior ahead of
-    // the pg v9 sslmode semantics change.
-    url.searchParams.set(
-      "sslmode",
-      "verify-full",
-    );
+    url.searchParams.set("sslmode", "verify-full");
   }
 
   return url.toString();
@@ -44,19 +31,13 @@ function normalizeConnectionString(
 function getConnectionString() {
   const candidates = useDirectConnection
     ? [
-        [
-          "DIRECT_DATABASE_URL",
-          process.env.DIRECT_DATABASE_URL,
-        ],
+        ["DIRECT_DATABASE_URL", process.env.DIRECT_DATABASE_URL],
         ["NEON_DB", process.env.NEON_DB],
         ["DATABASE_URL", process.env.DATABASE_URL],
       ]
     : [
         ["DATABASE_URL", process.env.DATABASE_URL],
-        [
-          "DIRECT_DATABASE_URL",
-          process.env.DIRECT_DATABASE_URL,
-        ],
+        ["DIRECT_DATABASE_URL", process.env.DIRECT_DATABASE_URL],
         ["NEON_DB", process.env.NEON_DB],
       ];
 
@@ -89,17 +70,18 @@ const globalForPostgres = globalThis as unknown as {
 export const pool =
   globalForPostgres.abunePool ??
   new Pool({
-    connectionString:
-      getConnectionString(),
+    connectionString: getConnectionString(),
     max: 5,
-
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
-
-    // Allows scripts to terminate after work is complete.
     allowExitOnIdle: true,
   });
 
 if (process.env.NODE_ENV !== "production") {
   globalForPostgres.abunePool = pool;
 }
+
+export const db = drizzle({
+  client: pool,
+  schema,
+});

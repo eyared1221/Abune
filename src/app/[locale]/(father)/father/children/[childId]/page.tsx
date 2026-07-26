@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 
 import { SpiritualChildProfileView } from "@/components/dashboard/spiritual-child-profile-view";
 import { PortalShell } from "@/components/dashboard/portal-shell";
-import { getSpiritualChildBySlug } from "@/lib/spiritual-children";
+import { getSpiritualChildBySlugAction } from "@/server/actions/spiritual-children.actions";
+import type { PersistedSpiritualChild } from "@/types/spiritual-child";
 
 export default async function SpiritualChildProfilePage({
   params,
@@ -10,17 +11,19 @@ export default async function SpiritualChildProfilePage({
   params: Promise<{ childId: string }>;
 }) {
   const { childId } = await params;
-  const child = getSpiritualChildBySlug(childId);
+  const result = await getSpiritualChildBySlugAction(childId);
 
-  if (!child) {
+  if (!result.success) {
     notFound();
   }
+
+  const child = result.child as PersistedSpiritualChild;
 
   return (
     <PortalShell
       currentPath="/father/children"
-      title={child.name}
-      description={`Profile overview for ${child.name}.`}
+      title={child.submission.baptismalName}
+      description={`Profile overview for ${child.submission.baptismalName}.`}
       showHero={false}
     >
       <SpiritualChildProfileView child={child} />

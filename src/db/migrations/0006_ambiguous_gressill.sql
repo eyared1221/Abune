@@ -1,0 +1,1 @@
+ALTER TABLE "availability_entries" DROP COLUMN "duration_minutes";

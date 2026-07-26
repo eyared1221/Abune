@@ -1,405 +1,330 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  CalendarClock,
   ChevronLeft,
   ChevronRight,
+  CircleCheck,
   Clock3,
+  MapPin,
   Pencil,
   Plus,
   Trash2,
 } from "lucide-react";
 
-import {
-  NewAppointmentModal,
-  type AppointmentStatus,
-  type AppointmentType,
-  type NewAppointmentSubmission,
-} from "@/components/dashboard/new-appointment-modal";
+import { NewAppointmentModal } from "@/components/dashboard/new-appointment-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import {
+  createAvailabilityAction,
+  deleteAvailabilityAction,
+  listAvailabilityCalendarAction,
+  updateAvailabilityAction,
+} from "@/server/actions/availability.actions";
+import type {
+  AvailabilityFormSubmission,
+  CalendarEntryDto,
+  MeetingMethod,
+} from "@/types/availability";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
-type CalendarAppointment = {
-  id: number;
-  title: string;
-  date: string;
-  time: string;
-  type: AppointmentType;
-  spiritualChild?: string;
-  duration?: string;
-  notes?: string;
-  reminder?: string;
-  status?: AppointmentStatus;
+const methodLabels: Record<MeetingMethod, string> = {
+  "in-person": "In-person meeting",
+  phone: "Phone appointment",
+  online: "Online meeting",
 };
 
-const appointmentTypeConfig: Record<
-  AppointmentType,
-  {
-    label: string;
-    dotClassName: string;
-    badgeClassName: string;
-  }
-> = {
-  confession: {
-    label: "Confession",
-    dotClassName: "bg-[#963bd8]",
-    badgeClassName: "bg-[#f3e8ff] text-[#7d2bc1]",
-  },
-  reflection: {
-    label: "Reflection",
-    dotClassName: "bg-[#2799cf]",
-    badgeClassName: "bg-[#e8f7fd] text-[#167fae]",
-  },
-  review: {
-    label: "Review",
-    dotClassName: "bg-[#d72768]",
-    badgeClassName: "bg-[#ffe9f1] text-[#bd1e59]",
-  },
-};
-
-const initialAppointments: CalendarAppointment[] = [
-  {
-    id: 1,
-    title: "Confession Meeting",
-    spiritualChild: "Mekdes Assefa",
-    date: "2026-07-09",
-    time: "9:00 AM",
-    type: "confession",
-    status: "scheduled",
-  },
-  {
-    id: 2,
-    title: "Spiritual Reflection",
-    spiritualChild: "Daniel Gebre",
-    date: "2026-07-09",
-    time: "11:30 AM",
-    type: "reflection",
-    status: "scheduled",
-  },
-  {
-    id: 3,
-    title: "Pastoral Review",
-    spiritualChild: "Hanna Tesfaye",
-    date: "2026-07-09",
-    time: "2:00 PM",
-    type: "review",
-    status: "scheduled",
-  },
-  {
-    id: 4,
-    title: "Spiritual Reflection",
-    spiritualChild: "Yonas Berhe",
-    date: "2026-07-11",
-    time: "10:00 AM",
-    type: "reflection",
-    status: "scheduled",
-  },
-  {
-    id: 5,
-    title: "Confession Meeting",
-    spiritualChild: "Rachel Michael",
-    date: "2026-07-13",
-    time: "3:00 PM",
-    type: "confession",
-    status: "scheduled",
-  },
-  {
-    id: 6,
-    title: "Pastoral Review",
-    spiritualChild: "Samuel Bekele",
-    date: "2026-07-16",
-    time: "1:30 PM",
-    type: "review",
-    status: "scheduled",
-  },
-];
-
-function createDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+function dateKey(date: Date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
-function isSameDate(firstDate: Date, secondDate: Date) {
+function sameDate(first: Date, second: Date) {
   return (
-    firstDate.getFullYear() === secondDate.getFullYear() &&
-    firstDate.getMonth() === secondDate.getMonth() &&
-    firstDate.getDate() === secondDate.getDate()
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
   );
 }
 
-function getCalendarDays(year: number, month: number) {
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-
-  const leadingDays = firstDayOfMonth.getDay();
-  const totalDays = lastDayOfMonth.getDate();
-
-  const cells: Array<Date | null> = [];
-
-  for (let index = 0; index < leadingDays; index += 1) {
-    cells.push(null);
-  }
+function calendarDays(year: number, month: number) {
+  const firstDay = new Date(year, month, 1).getDay();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const result: Array<Date | null> = Array(firstDay).fill(null);
 
   for (let day = 1; day <= totalDays; day += 1) {
-    cells.push(new Date(year, month, day));
+    result.push(new Date(year, month, day));
   }
 
-  while (cells.length % 7 !== 0) {
-    cells.push(null);
-  }
-
-  return cells;
+  while (result.length % 7 !== 0) result.push(null);
+  return result;
 }
 
-function formatMonthTitle(date: Date) {
+function monthRange(date: Date) {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return { startDate: dateKey(start), endDate: dateKey(end) };
+}
+
+function displayMonth(date: Date) {
   return new Intl.DateTimeFormat("en-US", {
     month: "long",
     year: "numeric",
   }).format(date);
 }
 
-function formatSelectedDate(date: Date) {
+function displayDate(date: Date) {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
+    year: "numeric",
   }).format(date);
+}
+
+function displayTime(value: string) {
+  const [hoursText = "0", minutes = "00"] = value.split(":");
+  const hours = Number(hoursText);
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return `${hour12}:${minutes} ${suffix}`;
 }
 
 export function CalendarView() {
   const today = useMemo(() => new Date(), []);
-  const [isNewAppointmentModalOpen, setIsNewAppointmentModalOpen] =
-    useState(false);
-  const [appointmentBeingEdited, setAppointmentBeingEdited] =
-    useState<CalendarAppointment | null>(null);
-  const [swipedAppointmentId, setSwipedAppointmentId] = useState<number | null>(
-    null,
+  const [month, setMonth] = useState(
+    () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [visibleMonth, setVisibleMonth] = useState(
-    () => new Date(2026, 6, 1),
-  );
-  const [selectedDate, setSelectedDate] = useState(
-    () => new Date(2026, 6, 8),
-  );
-  const [calendarAppointments, setCalendarAppointments] =
-    useState<CalendarAppointment[]>(initialAppointments);
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [entries, setEntries] = useState<CalendarEntryDto[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<CalendarEntryDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const calendarDays = useMemo(
-    () =>
-      getCalendarDays(
-        visibleMonth.getFullYear(),
-        visibleMonth.getMonth(),
-      ),
-    [visibleMonth],
-  );
+  const loadMonth = useCallback(async (targetMonth: Date, quiet = false) => {
+    if (!quiet) setLoading(true);
 
-  const appointmentsByDate = useMemo(() => {
-    return calendarAppointments.reduce<Record<string, CalendarAppointment[]>>(
-      (result, appointment) => {
-        if (!result[appointment.date]) {
-          result[appointment.date] = [];
-        }
-
-        result[appointment.date].push(appointment);
-        return result;
-      },
-      {},
-    );
-  }, [calendarAppointments]);
-
-  const selectedDateKey = createDateKey(selectedDate);
-  const selectedAppointments =
-    appointmentsByDate[selectedDateKey] ?? [];
-
-  const goToPreviousMonth = () => {
-    setVisibleMonth((currentMonth) => {
-      const previousMonth = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth() - 1,
-        1,
-      );
-
-      setSelectedDate(previousMonth);
-
-      return previousMonth;
-    });
-  };
-
-  const goToNextMonth = () => {
-    setVisibleMonth((currentMonth) => {
-      const nextMonth = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth() + 1,
-        1,
-      );
-
-      setSelectedDate(nextMonth);
-
-      return nextMonth;
-    });
-  };
-
-  const goToToday = () => {
-    const currentDate = new Date();
-
-    setVisibleMonth(
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1,
-      ),
+    const result = await listAvailabilityCalendarAction(
+      monthRange(targetMonth),
     );
 
-    setSelectedDate(currentDate);
-  };
-
-  const handleCreateAppointment = (
-    submission: NewAppointmentSubmission,
-  ) => {
-    if (appointmentBeingEdited) {
-      setCalendarAppointments((currentAppointments) =>
-        currentAppointments.map((appointment) =>
-          appointment.id === appointmentBeingEdited.id
-            ? {
-                ...appointment,
-                title: submission.title,
-                date: submission.date,
-                time: submission.time,
-                type: submission.type,
-                spiritualChild: submission.spiritualChild,
-                duration: submission.duration,
-                notes: submission.notes,
-                reminder: submission.reminder,
-                status: submission.status,
-              }
-            : appointment,
-        ),
-      );
+    if (result.success) {
+      setEntries(result.data.entries);
+      setError(null);
     } else {
-      setCalendarAppointments((currentAppointments) => [
-        ...currentAppointments,
-        {
-          id:
-            currentAppointments.length === 0
-              ? 1
-              : Math.max(...currentAppointments.map((item) => item.id)) + 1,
-          title: submission.title,
-          date: submission.date,
-          time: submission.time,
-          type: submission.type,
-          spiritualChild: submission.spiritualChild,
-          duration: submission.duration,
-          notes: submission.notes,
-          reminder: submission.reminder,
-          status: submission.status,
-        },
-      ]);
+      setError(result.error);
     }
 
-    const appointmentDate = new Date(submission.date);
-    if (!Number.isNaN(appointmentDate.getTime())) {
-      setVisibleMonth(
-        new Date(
-          appointmentDate.getFullYear(),
-          appointmentDate.getMonth(),
-          1,
-        ),
-      );
-      setSelectedDate(appointmentDate);
-    }
+    if (!quiet) setLoading(false);
+    return result.success;
+  }, []);
 
-    setAppointmentBeingEdited(null);
-    setSwipedAppointmentId(null);
-    setIsNewAppointmentModalOpen(false);
+  useEffect(() => {
+    let active = true;
+
+    const run = async () => {
+      setLoading(true);
+      const result = await listAvailabilityCalendarAction(monthRange(month));
+      if (!active) return;
+
+      if (result.success) {
+        setEntries(result.data.entries);
+        const firstEntry = result.data.entries[0];
+
+        setSelectedDate((current) => {
+          const selectedDateHasEntry = result.data.entries.some(
+            (entry) => entry.date === dateKey(current),
+          );
+          return !selectedDateHasEntry && firstEntry
+            ? new Date(`${firstEntry.date}T00:00:00`)
+            : current;
+        });
+        setError(null);
+      } else {
+        setError(result.error);
+      }
+      setLoading(false);
+    };
+
+    void run();
+    return () => {
+      active = false;
+    };
+  }, [month]);
+
+  const days = useMemo(
+    () => calendarDays(month.getFullYear(), month.getMonth()),
+    [month],
+  );
+
+  const byDate = useMemo(
+    () =>
+      entries.reduce<Record<string, CalendarEntryDto[]>>((result, entry) => {
+        result[entry.date] ??= [];
+        result[entry.date].push(entry);
+        return result;
+      }, {}),
+    [entries],
+  );
+
+  const selectedKey = dateKey(selectedDate);
+  const selectedEntries = [...(byDate[selectedKey] ?? [])].sort((a, b) =>
+    a.startTime.localeCompare(b.startTime),
+  );
+
+  const openCreate = () => {
+    setEditing(null);
+    setError(null);
+    setModalOpen(true);
   };
 
-  const handleDeleteAppointment = (appointmentId: number) => {
-    setCalendarAppointments((currentAppointments) =>
-      currentAppointments.filter(
-        (appointment) => appointment.id !== appointmentId,
-      ),
+  const saveEntry = async (submission: AvailabilityFormSubmission) => {
+    setSaving(true);
+    setError(null);
+
+    const result = editing
+      ? await updateAvailabilityAction(editing.id, submission)
+      : await createAvailabilityAction(submission);
+
+    if (!result.success) {
+      setError(result.error);
+      setSaving(false);
+      return;
+    }
+
+    const savedDate = new Date(`${result.entry.date}T00:00:00`);
+    const savedMonth = new Date(
+      savedDate.getFullYear(),
+      savedDate.getMonth(),
+      1,
     );
-    setSwipedAppointmentId(null);
 
-    if (appointmentBeingEdited?.id === appointmentId) {
-      setAppointmentBeingEdited(null);
-      setIsNewAppointmentModalOpen(false);
+    setSelectedDate(savedDate);
+    setMonth(savedMonth);
+    await loadMonth(savedMonth, true);
+    setEditing(null);
+    setModalOpen(false);
+    setSaving(false);
+  };
+
+  const deleteEntry = async (entry: CalendarEntryDto) => {
+    const confirmed = window.confirm(
+      `Delete the ${displayTime(entry.startTime)} appointment time?`,
+    );
+    if (!confirmed) return;
+
+    setDeletingId(entry.id);
+    setError(null);
+    const result = await deleteAvailabilityAction(entry.id);
+
+    if (!result.success) {
+      setError(result.error);
+      setDeletingId(null);
+      return;
     }
-  };
 
-  const handleEditAppointment = (appointment: CalendarAppointment) => {
-    setAppointmentBeingEdited(appointment);
-    setSwipedAppointmentId(null);
-    setIsNewAppointmentModalOpen(true);
-  };
-
-  const openCreateModal = () => {
-    setAppointmentBeingEdited(null);
-    setSwipedAppointmentId(null);
-    setIsNewAppointmentModalOpen(true);
+    await loadMonth(month, true);
+    setDeletingId(null);
   };
 
   return (
     <>
-      <div className="space-y-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#10295a]">
-              Calendar
+            <h1 className="text-2xl font-bold text-[#10295a]">
+              Availability Calendar
             </h1>
-
             <p className="mt-1 text-sm font-medium text-[#7d89a3]">
-              Manage appointments and schedule
+              Create the times spiritual children may request.
             </p>
           </div>
 
           <Button
-            className="h-11 rounded-[14px] bg-[#d4ab4f] px-5 text-sm font-bold text-white shadow-[0_8px_18px_rgba(212,171,79,0.22)] hover:bg-[#c49b3f]"
-            onClick={openCreateModal}
+            className="h-11 rounded-[14px] bg-[#d4ab4f] px-5 font-bold text-white hover:bg-[#c49b3f]"
+            onClick={openCreate}
           >
             <Plus className="h-4 w-4" />
-            New Appointment
+            Add Availability
           </Button>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <Card className="rounded-[22px] border border-[#ede5d8] bg-white shadow-[0_12px_30px_rgba(30,44,83,0.07)]">
+        {error && !modalOpen ? (
+          <div
+            className="rounded-[16px] border border-[#f0d0ca] bg-[#fff5f3] px-5 py-4 text-sm font-semibold text-[#a3463b]"
+            role="alert"
+          >
+            {error}
+          </div>
+        ) : null}
+
+        <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_470px]">
+          <Card className="order-1 rounded-[24px] border border-[#ede5d8] bg-white shadow-[0_12px_30px_rgba(30,44,83,0.07)] xl:order-2">
             <CardContent className="p-5 sm:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-xl font-bold text-[#10295a]">
-                  {formatMonthTitle(visibleMonth)}
-                </h2>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-bold text-[#10295a]">
+                    {displayMonth(month)}
+                  </h2>
+                  <p className="mt-1 text-xs font-semibold text-[#8993aa]">
+                    Select a day to manage its availability.
+                  </p>
+                </div>
 
                 <div className="flex items-center gap-2">
                   <button
-                    className="h-9 rounded-[11px] border border-[#e8e0d2] bg-white px-3 text-xs font-bold text-[#52607b] transition-colors hover:bg-[#faf6ee]"
-                    onClick={goToToday}
+                    className="h-9 rounded-[11px] border border-[#e8e0d2] px-3 text-xs font-bold text-[#52607b]"
+                    onClick={() => {
+                      const current = new Date();
+                      setSelectedDate(current);
+                      setMonth(
+                        new Date(
+                          current.getFullYear(),
+                          current.getMonth(),
+                          1,
+                        ),
+                      );
+                    }}
                     type="button"
                   >
                     Today
                   </button>
-
                   <button
                     aria-label="Previous month"
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-[#263453] transition-colors hover:bg-[#faf6ee]"
-                    onClick={goToPreviousMonth}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-[#263453] hover:bg-[#faf6ee]"
+                    onClick={() => {
+                      const previous = new Date(
+                        month.getFullYear(),
+                        month.getMonth() - 1,
+                        1,
+                      );
+                      setMonth(previous);
+                      setSelectedDate(previous);
+                    }}
                     type="button"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-
                   <button
                     aria-label="Next month"
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-[#263453] transition-colors hover:bg-[#faf6ee]"
-                    onClick={goToNextMonth}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-[#263453] hover:bg-[#faf6ee]"
+                    onClick={() => {
+                      const next = new Date(
+                        month.getFullYear(),
+                        month.getMonth() + 1,
+                        1,
+                      );
+                      setMonth(next);
+                      setSelectedDate(next);
+                    }}
                     type="button"
                   >
                     <ChevronRight className="h-5 w-5" />
@@ -407,64 +332,47 @@ export function CalendarView() {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-7 gap-1 sm:gap-2">
+              <div className="mt-5 grid grid-cols-7 auto-rows-[44px] gap-1.5 sm:auto-rows-[52px] sm:gap-2">
                 {weekdays.map((weekday) => (
                   <div
                     key={weekday}
-                    className="pb-2 text-center text-xs font-semibold text-[#8b95ad] sm:text-sm"
+                    className="pb-2 text-center text-xs font-semibold text-[#8b95ad]"
                   >
                     {weekday}
                   </div>
                 ))}
 
-                {calendarDays.map((date, index) => {
+                {days.map((date, index) => {
                   if (!date) {
                     return (
                       <div
                         key={`empty-${index}`}
-                        className="min-h-[48px] sm:min-h-[66px]"
+                        className="h-full"
                       />
                     );
                   }
 
-                  const dateKey = createDateKey(date);
-                  const dayAppointments =
-                    appointmentsByDate[dateKey] ?? [];
-
-                  const appointmentTypes = Array.from(
-                    new Set(
-                      dayAppointments.map(
-                        (appointment) => appointment.type,
-                      ),
-                    ),
-                  );
-
-                  const selected = isSameDate(date, selectedDate);
-                  const currentDay = isSameDate(date, today);
+                  const key = dateKey(date);
+                  const hasAvailability = (byDate[key] ?? []).length > 0;
+                  const selected = sameDate(date, selectedDate);
+                  const currentDay = sameDate(date, today);
 
                   return (
                     <button
-                      key={dateKey}
-                      aria-label={`Select ${date.toLocaleDateString()}`}
-                      className={cn(
-                        "group relative flex min-h-[48px] flex-col items-center justify-center rounded-[12px] border border-transparent px-1 py-1.5 text-center transition-all sm:min-h-[66px] sm:rounded-[15px]",
-                        selected &&
-                          "border-[#e5c77d] bg-[#fbf0d8] shadow-[0_6px_15px_rgba(180,145,70,0.12)]",
-                        !selected &&
-                          "hover:border-[#eee4d2] hover:bg-[#fcfaf6]",
-                      )}
+                      key={key}
+                      className="group flex h-full flex-col items-center justify-center py-1"
                       onClick={() => {
                         setSelectedDate(date);
-                        setSwipedAppointmentId(null);
+                        setError(null);
                       }}
                       type="button"
                     >
                       <span
                         className={cn(
-                          "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors sm:h-8 sm:w-8 sm:text-sm",
-                          selected &&
-                            "bg-[#c69a39] text-white shadow-[0_4px_10px_rgba(198,154,57,0.24)]",
-                          !selected && "text-[#10295a]",
+                          "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold",
+                          selected
+                            ? "bg-[#c69a39] text-white"
+                            : "text-[#10295a] group-hover:bg-[#fcfaf6]",
                           currentDay &&
                             !selected &&
                             "border border-[#c69a39] text-[#a47820]",
@@ -473,189 +381,141 @@ export function CalendarView() {
                         {date.getDate()}
                       </span>
 
-                      {appointmentTypes.length > 0 && (
-                        <div className="mt-1 flex items-center justify-center gap-1">
-                          {appointmentTypes.map((type) => (
-                            <span
-                              key={`${dateKey}-${type}`}
-                              aria-label={
-                                appointmentTypeConfig[type].label
-                              }
-                              className={cn(
-                                "h-1.5 w-1.5 rounded-full",
-                                appointmentTypeConfig[type]
-                                  .dotClassName,
-                              )}
-                            />
-                          ))}
-                        </div>
-                      )}
+                      <div className="mt-1.5 flex h-1.5 gap-1">
+                        {hasAvailability ? (
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#c69a39]" />
+                        ) : null}
+                      </div>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="mt-6 border-t border-[#e9e1d5] pt-4">
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                  {(
-                    Object.entries(appointmentTypeConfig) as Array<
-                      [
-                        AppointmentType,
-                        (typeof appointmentTypeConfig)[AppointmentType],
-                      ]
-                    >
-                  ).map(([type, config]) => (
-                    <div
-                      key={type}
-                      className="flex items-center gap-2"
-                    >
-                      <span
-                        className={cn(
-                          "h-2.5 w-2.5 rounded-full",
-                          config.dotClassName,
-                        )}
-                      />
-
-                      <span className="text-xs font-medium text-[#78849e] sm:text-sm">
-                        {config.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              <div className="mt-4 flex items-center gap-2 border-t border-[#e9e1d5] pt-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#c69a39]" />
+                <span className="text-xs font-semibold text-[#78849e]">
+                  Available
+                </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-[22px] border border-[#ede5d8] bg-white shadow-[0_12px_30px_rgba(30,44,83,0.07)]">
-            <CardContent className="p-5 sm:p-6">
-              <h2 className="text-xl font-bold text-[#10295a]">
-                {formatSelectedDate(selectedDate)}
-              </h2>
+          <Card className="order-2 rounded-[24px] border border-[#ede5d8] bg-white shadow-[0_12px_30px_rgba(30,44,83,0.07)] xl:order-1">
+            <CardContent className="flex flex-col p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-[#10295a]">
+                    {displayDate(selectedDate)}
+                  </h2>
+                  <p className="mt-1 text-xs font-semibold text-[#929bb0]">
+                    {loading ? "Loading..." : `${selectedEntries.length} calendar entries`}
+                  </p>
+                </div>
 
-              <p className="mt-1 text-xs font-medium text-[#929bb0]">
-                {selectedAppointments.length}{" "}
-                {selectedAppointments.length === 1
-                  ? "appointment"
-                  : "appointments"}
-              </p>
+                <button
+                  className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-[#f6efe1] text-[#a37d2d]"
+                  onClick={openCreate}
+                  type="button"
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
+              </div>
 
-              {selectedAppointments.length === 0 ? (
-                <div className="flex min-h-[380px] flex-col items-center justify-center text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f8f1e6] text-[#8d99b0]">
-                    <Clock3 className="h-6 w-6" />
+
+
+              {loading ? (
+                <div className="flex min-h-[390px] flex-1 items-center justify-center text-sm font-bold text-[#8792aa]">
+                  Loading calendar…
+                </div>
+              ) : selectedEntries.length === 0 ? (
+                <div className="flex min-h-[390px] flex-1 flex-col items-center justify-center text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f8f1e6] text-[#8d99b0]">
+                    <Clock3 className="h-7 w-7" />
                   </div>
-
-                  <p className="mt-4 text-sm font-semibold text-[#8a95ae]">
-                    No appointments scheduled
+                  <p className="mt-4 text-sm font-bold text-[#4f5c77]">
+                    No availability created
+                  </p>
+                  <p className="mt-2 text-xs text-[#8a95ae]">
+                    Add a time slot for this date.
                   </p>
                 </div>
               ) : (
-                <div className="mt-5 space-y-3">
-                  {selectedAppointments.map((appointment) => {
-                    const typeConfig =
-                      appointmentTypeConfig[appointment.type];
-
+                <div className="mt-5 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+                  {selectedEntries.map((entry) => {
                     return (
                       <div
-                        key={appointment.id}
-                        className="relative overflow-hidden rounded-[16px]"
-                        onTouchEnd={(event) => {
-                          if (touchStartX === null) {
-                            return;
-                          }
-
-                          const delta = touchStartX - event.changedTouches[0].clientX;
-                          if (delta > 60) {
-                            setSwipedAppointmentId(appointment.id);
-                          } else if (delta < -40) {
-                            setSwipedAppointmentId(null);
-                          }
-
-                          setTouchStartX(null);
-                        }}
-                        onTouchStart={(event) => {
-                          setTouchStartX(event.touches[0].clientX);
-                        }}
+                        key={entry.id}
+                        className={cn(
+                          "rounded-[18px] border p-4",
+                          "border-[#e4d3a5] bg-[#fffdf8]",
+                        )}
                       >
-                        <div className="absolute inset-y-0 right-0 flex w-[88px] items-center justify-center rounded-[16px] bg-[#d84f4f]">
-                          <button
-                            className="flex h-full w-full items-center justify-center gap-2 text-sm font-bold text-white"
-                            onClick={() => handleDeleteAppointment(appointment.id)}
-                            type="button"
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={cn(
+                              "flex h-10 w-10 items-center justify-center rounded-[13px]",
+                              "bg-[#f8efd6] text-[#a47820]",
+                            )}
                           >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </button>
-                        </div>
+                            <CircleCheck className="h-5 w-5" />
+                          </div>
 
-                        <div
-                          className={cn(
-                            "relative rounded-[16px] border border-[#ebe4d8] bg-[#fdfcf9] p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[#dacaab] hover:shadow-[0_8px_18px_rgba(30,44,83,0.06)]",
-                            swipedAppointmentId === appointment.id &&
-                              "-translate-x-[88px]",
-                          )}
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <span
-                              className={cn(
-                                "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
-                                typeConfig.dotClassName,
-                              )}
-                            />
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-start justify-between gap-2">
-                                <p className="text-sm font-bold text-[#1d2b51]">
-                                  {appointment.title}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap justify-between gap-2">
+                              <div>
+                                <p className="mt-1 text-xs font-bold text-[#66728c]">
+                                  {displayTime(entry.startTime)}–
+                                  {displayTime(entry.endTime)}
                                 </p>
-
-                                <span
-                                  className={cn(
-                                    "rounded-full px-2 py-0.5 text-[10px] font-bold",
-                                    typeConfig.badgeClassName,
-                                  )}
-                                >
-                                  {typeConfig.label}
-                                </span>
                               </div>
 
-                              {appointment.spiritualChild && (
-                                <p className="mt-1.5 text-xs font-semibold text-[#66728c]">
-                                  {appointment.spiritualChild}
-                                </p>
-                              )}
-
-                              <div className="mt-2 flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-1.5 text-xs font-medium text-[#8993aa]">
-                                  <Clock3 className="h-3.5 w-3.5" />
-                                  {appointment.time}
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    aria-label={`Edit ${appointment.title}`}
-                                    className="flex h-8 w-8 items-center justify-center rounded-full text-[#7b86a0] transition-colors hover:bg-[#f3eee4] hover:text-[#2b3a5e]"
-                                    onClick={() =>
-                                      handleEditAppointment(appointment)
-                                    }
-                                    type="button"
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </button>
-
-                                  <button
-                                    aria-label={`Delete ${appointment.title}`}
-                                    className="flex h-8 w-8 items-center justify-center rounded-full text-[#c05555] transition-colors hover:bg-[#fff1f1] hover:text-[#a93636]"
-                                    onClick={() =>
-                                      handleDeleteAppointment(appointment.id)
-                                    }
-                                    type="button"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              </div>
+                              <span
+                                className={cn(
+                                  "rounded-full px-2.5 py-1 text-[10px] font-extrabold",
+                                  "bg-[#f8efd6] text-[#a47820]",
+                                )}
+                              >
+                                Available
+                              </span>
                             </div>
+
+                            <div className="mt-3 space-y-2 text-xs font-semibold text-[#758098]">
+                              <p className="flex items-center gap-2">
+                                    <MapPin className="h-3.5 w-3.5" />
+                                    {methodLabels[entry.meetingMethod]} ·{" "}
+                                    {entry.location || "No location"}
+                              </p>
+
+                              {entry.notes ? (
+                                <p className="leading-5">{entry.notes}</p>
+                              ) : null}
+                            </div>
+
+                            {entry.editable ? (
+                              <div className="mt-4 flex justify-end gap-2 border-t border-black/[0.05] pt-3">
+                                <button
+                                  className="flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 text-xs font-bold text-[#64708a] hover:bg-white"
+                                  onClick={() => {
+                                    setEditing(entry);
+                                    setError(null);
+                                    setModalOpen(true);
+                                  }}
+                                  type="button"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                  Edit
+                                </button>
+                                <button
+                                  className="flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 text-xs font-bold text-[#b44d4d] hover:bg-[#fff1f1] disabled:opacity-50"
+                                  disabled={deletingId === entry.id}
+                                  onClick={() => void deleteEntry(entry)}
+                                  type="button"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  {deletingId === entry.id ? "Deleting…" : "Delete"}
+                                </button>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       </div>
@@ -667,36 +527,22 @@ export function CalendarView() {
           </Card>
         </div>
 
-        <Card className="rounded-[22px] border border-[#ede5d8] bg-gradient-to-r from-[#fff9ef] to-[#fffdf9] shadow-[0_8px_22px_rgba(30,44,83,0.05)]">
-          <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-[#f8efdc] text-[#c79b43]">
-              <CalendarClock className="h-5 w-5" />
-            </div>
-
-            <div>
-              <p className="text-base font-bold text-[#17305d]">
-                Schedule Overview
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-[#7d89a3] sm:text-sm">
-                Use the calendar to review upcoming appointments and
-                select a day to manage its spiritual meetings.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <NewAppointmentModal
-        defaultDate={selectedDateKey}
-        initialValues={appointmentBeingEdited}
-        mode={appointmentBeingEdited ? "edit" : "create"}
-        open={isNewAppointmentModalOpen}
+        busy={saving}
+        defaultDate={selectedKey}
+        error={error}
+        initialValues={editing}
+        mode={editing ? "edit" : "create"}
+        open={modalOpen}
         onClose={() => {
-          setIsNewAppointmentModalOpen(false);
-          setAppointmentBeingEdited(null);
+          if (saving) return;
+          setModalOpen(false);
+          setEditing(null);
+          setError(null);
         }}
-        onSave={handleCreateAppointment}
+        onSave={saveEntry}
       />
     </>
   );
