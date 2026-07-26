@@ -1,15 +1,25 @@
 {
   "name": "Abune",
   "short_name": "Abune",
-  "start_url": "/login",
+  "description": "Spiritual guidance platform for fathers and children.",
+  "id": "/en/login",
+  "start_url": "/en/login",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#f7f8fc",
-  "theme_color": "#123d91",
+  "background_color": "#f5f2eb",
+  "theme_color": "#c69a39",
   "icons": [
     {
-      "src": "/images/logo.png",
+      "src": "/icons/abune-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/abune-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
