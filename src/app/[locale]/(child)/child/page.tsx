@@ -9,7 +9,6 @@ import {
   Menu,
   MessageCircle,
   Plus,
-  ScrollText,
 } from "lucide-react";
 
 export default function ChildDashboardPage() {
@@ -43,21 +42,17 @@ export default function ChildDashboardPage() {
           </button>
         </header>
 
-        <section className="relative mt-5 flex min-h-[190px] items-center overflow-hidden rounded-[26px] border border-[#e8c77e] bg-[radial-gradient(circle_at_100%_50%,rgba(234,204,142,0.2),transparent_31%),linear-gradient(135deg,#fffefa,#fff9f0)] px-3 py-4 shadow-[0_4px_12px_rgba(98,68,23,0.12)] min-[480px]:mt-6 min-[480px]:min-h-[235px] min-[480px]:rounded-[32px] min-[480px]:px-5 min-[480px]:py-5 sm:px-8">
+        <section className="relative mt-5 flex min-h-[150px] items-center overflow-hidden rounded-[26px] border border-[#e8c77e] bg-[radial-gradient(circle_at_100%_50%,rgba(234,204,142,0.2),transparent_31%),linear-gradient(135deg,#fffefa,#fff9f0)] px-5 py-4 shadow-[0_4px_12px_rgba(98,68,23,0.12)] min-[480px]:mt-6 min-[480px]:min-h-[185px] min-[480px]:rounded-[32px] min-[480px]:px-8 min-[480px]:py-5">
           <div className="absolute -right-10 bottom-1 h-44 w-44 rounded-full border-[18px] border-[#f5e7cc]/60" />
-          <img
-            alt="Child praying"
-            className="w-[40%] max-w-[280px] shrink-0 [clip-path:circle(45%_at_50%_50%)]"
-            src="/images/prayer-child-source.png"
-          />
-
-          <div className="relative z-10 min-w-0 flex-1 pl-1 sm:pl-5">
-            <p className="font-serif text-base text-[#ad7318] min-[480px]:text-lg sm:text-xl">Welcome,</p>
-            <h1 className="mt-1 font-serif text-3xl font-bold leading-none min-[480px]:text-4xl sm:text-5xl">Selam!</h1>
+          <div className="relative z-10 min-w-0 flex-1">
+            <h1 className="font-serif text-3xl font-bold leading-tight text-[#10275e] min-[480px]:text-4xl sm:text-5xl">
+              <span className="font-normal text-[#ad7318]">Welcome, </span>
+              Selam!
+            </h1>
             <p className="mt-2 font-serif text-base italic leading-tight text-[#b27416] min-[480px]:mt-3 min-[480px]:text-lg sm:text-xl">
               Walk in faith. Grow in grace.
             </p>
-            <div className="mt-3 flex items-center gap-3 text-[#dcbd7c] min-[480px]:mt-5">
+            <div className="hidden mt-3 items-center gap-3 text-[#dcbd7c] min-[480px]:mt-5">
               <span className="h-px flex-1 bg-[#ead4a9]" />
               <span>✧</span>
               <span className="h-px flex-1 bg-[#ead4a9]" />
@@ -144,14 +139,18 @@ function QuickAccessCard({
 }) {
   return (
     <button
-      className={`flex min-h-[150px] flex-col rounded-[20px] border p-4 text-left shadow-[0_3px_8px_rgba(93,65,24,0.10)] transition-transform hover:-translate-y-0.5 [&>svg+span]:hidden min-[480px]:min-h-[185px] min-[480px]:rounded-[24px] min-[480px]:p-5 ${tone}`}
+      className={`flex min-h-[125px] flex-col rounded-[20px] border p-4 text-left shadow-[0_3px_8px_rgba(93,65,24,0.10)] transition-transform hover:-translate-y-0.5 [&>svg+span]:hidden min-[480px]:min-h-[150px] min-[480px]:rounded-[24px] min-[480px]:p-5 ${tone}`}
       type="button"
     >
-      <span className={`flex h-12 w-12 items-center justify-center rounded-full border border-[#f0dab0] bg-[#fff8e9] min-[480px]:h-14 min-[480px]:w-14 ${iconClassName}`}>
-        {icon}
-      </span>
-      <span className="mt-3 font-serif text-lg font-bold leading-tight text-[#10275e] min-[480px]:mt-4 min-[480px]:text-xl">{title}</span>
-      <span className="mt-1 font-serif text-sm text-[#706559] min-[480px]:text-base">{subtitle}</span>
+      <div className="flex items-center gap-3 min-[480px]:gap-4">
+        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#f0dab0] bg-[#fff8e9] min-[480px]:h-12 min-[480px]:w-12 ${iconClassName}`}>
+          {icon}
+        </span>
+        <span className="min-w-0">
+          <span className="block font-serif text-lg font-bold leading-tight text-[#10275e] min-[480px]:text-xl">{title}</span>
+          <span className="mt-1 block font-serif text-sm text-[#706559] min-[480px]:text-base">{subtitle}</span>
+        </span>
+      </div>
       <ChevronRight className="mt-auto self-end h-5 w-5 text-[#b47a13] min-[480px]:h-6 min-[480px]:w-6" />
       <span className="mt-auto self-end text-2xl leading-none text-[#c58a25]">›</span>
     </button>
@@ -181,7 +180,7 @@ function NavItem({
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-5">
-      <h2 className="shrink-0 font-serif text-xl font-bold uppercase tracking-wide text-[#10275e] min-[480px]:text-2xl sm:text-[27px]">
+      <h2 className="shrink-0 font-serif text-lg font-bold uppercase tracking-wide text-[#10275e] min-[480px]:text-xl sm:text-2xl">
         {children}
       </h2>
       <span className="h-px flex-1 bg-[#e4c486]" />
