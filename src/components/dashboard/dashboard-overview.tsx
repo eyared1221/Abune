@@ -2,12 +2,15 @@
 
 import {
   Bell,
+  BookHeart,
   CalendarCheck2,
   CalendarClock,
   ChevronRight,
   Cross,
   HandHeart,
   Heart,
+  FileBadge,
+  MessageCircleMore,
   NotebookTabs,
   TrendingUp,
   UserRoundCheck,
@@ -160,6 +163,27 @@ const reminders = [
   },
 ] as const;
 
+const requestSummaryItems = [
+  { label: "Counseling", value: 5, percent: "36%", color: "bg-[#b99645]" },
+  { label: "Guidance", value: 4, percent: "29%", color: "bg-[#ddb84f]" },
+  { label: "Prayer", value: 3, percent: "21%", color: "bg-[#7f8aa3]" },
+  { label: "Confession", value: 2, percent: "14%", color: "bg-[#c96b5b]" },
+] as const;
+
+const popularRequestTypes = [
+  { label: "Counseling", count: 5, icon: FileBadge, iconClassName: "bg-[#f6efe1] text-[#a37d2d]" },
+  { label: "Guidance", count: 4, icon: BookHeart, iconClassName: "bg-[#ddb84f] text-[#18335f]" },
+  { label: "Prayer", count: 3, icon: MessageCircleMore, iconClassName: "bg-[#fff1ed] text-[#b45b4d]" },
+  { label: "Confession", count: 2, icon: BookHeart, iconClassName: "bg-[#f6efe1] text-[#a37d2d]" },
+] as const;
+
+const requestQuickActions = [
+  "Create Guidance Note",
+  "Send Message",
+  "Schedule Appointment",
+  "Add Reminder",
+] as const;
+
 export function DashboardOverview() {
   return (
     <div className="space-y-7">
@@ -215,6 +239,78 @@ export function DashboardOverview() {
             </div>
           ),
         )}
+      </section>
+
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <Card className="rounded-[24px] border border-[#ebe5d9] bg-[#fdfcf9] shadow-[0_10px_28px_rgba(26,38,67,0.06)]">
+          <CardHeader className="pb-4">
+            <CardTitle>Request Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mx-auto flex h-40 w-40 items-center justify-center rounded-full bg-[conic-gradient(#b99645_0_36%,#ddb84f_36%_65%,#7f8aa3_65%_86%,#c96b5b_86%_100%)] p-5">
+              <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-white">
+                <p className="text-4xl font-extrabold text-[#1d2859]">14</p>
+                <p className="text-sm font-semibold text-[#6b7695]">Total</p>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {requestSummaryItems.map((item) => (
+                <div key={item.label} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-3 text-[#4c5678]">
+                    <span className={cn("h-3 w-3 rounded-full", item.color)} />
+                    <span className="font-semibold">{item.label}</span>
+                  </div>
+                  <span className="font-bold text-[#1d2859]">
+                    {item.value} ({item.percent})
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[24px] border border-[#ebe5d9] bg-[#fdfcf9] shadow-[0_10px_28px_rgba(26,38,67,0.06)]">
+          <CardHeader className="pb-4">
+            <CardTitle>Popular Request Types</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {popularRequestTypes.map(({ count, icon: Icon, iconClassName, label }) => (
+              <div key={label} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl", iconClassName)}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <span className="font-semibold text-[#4c5678]">{label}</span>
+                </div>
+                <span className="font-bold text-[#1d2859]">{count}</span>
+              </div>
+            ))}
+
+            <button className="flex items-center gap-2 pt-2 text-sm font-extrabold text-[#9b7525]" type="button">
+              View Full Report
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[24px] border border-[#ebe5d9] bg-[#fdfcf9] shadow-[0_10px_28px_rgba(26,38,67,0.06)]">
+          <CardHeader className="pb-4">
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {requestQuickActions.map((action) => (
+              <button
+                key={action}
+                className="flex w-full items-center justify-between rounded-2xl px-3 py-3 text-left text-sm font-semibold text-[#4c5678] transition-colors hover:bg-[#f8faff]"
+                type="button"
+              >
+                <span>{action}</span>
+                <ChevronRight className="h-4 w-4 text-[#98a0bc]" />
+              </button>
+            ))}
+          </CardContent>
+        </Card>
       </section>
 
       {/* Requests and appointments */}

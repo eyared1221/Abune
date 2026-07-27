@@ -57,6 +57,12 @@ const primaryNavigation: NavItem[] = [
     match: ["/father/appointments"],
   },
   {
+    label: "Requests",
+    href: "/father/requests",
+    icon: FileBadge,
+    match: ["/father/requests"],
+  },
+  {
     label: "Confessions",
     href: "/confessions",
     icon: BookHeart,
@@ -67,12 +73,6 @@ const primaryNavigation: NavItem[] = [
     href: "/father/spiritual-dates",
     icon: CalendarHeart,
     match: ["/father/spiritual-dates"],
-  },
-  {
-    label: "Requests",
-    href: "/father/requests",
-    icon: FileBadge,
-    match: ["/father/requests"],
   },
   {
     label: "Reminders",

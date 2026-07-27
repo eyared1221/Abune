@@ -1,6 +1,14 @@
 "use client";
 
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { useLocale } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -25,10 +33,11 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-const handleSubmit = async (
+  const handleSubmit = async (
   event: FormEvent<HTMLFormElement>,
 ) => {
   event.preventDefault();
@@ -90,6 +99,14 @@ const handleSubmit = async (
   }
 };
 
+  const handleRegistrationSubmit = (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    router.replace("/child", { locale });
+    router.refresh();
+  };
+
   return (
     <main className="h-[100dvh] overflow-hidden bg-[#f4efe6] p-2 sm:p-3 lg:p-4">
       <div className="mx-auto grid h-full max-w-[1530px] overflow-hidden rounded-[22px] border border-[#e2d2b5] bg-white shadow-[0_18px_60px_rgba(101,76,31,0.12)] lg:grid-cols-2">
@@ -135,71 +152,191 @@ const handleSubmit = async (
 
         {/* Right panel */}
         <section
-          className="relative flex h-full min-h-0 items-center justify-center overflow-hidden px-4 py-4 sm:px-7 lg:px-10 xl:px-14"
+          className="relative flex h-full min-h-0 items-center justify-center overflow-hidden bg-[#fffdf8] px-5 py-6 sm:px-10 lg:px-14"
           style={{
             background:
-              "radial-gradient(circle at top right, rgba(197, 155, 61, 0.14), transparent 34%), linear-gradient(145deg, #fffdf8 0%, #fbf4e8 100%)",
+              "radial-gradient(circle at 84% 14%, rgba(222, 183, 100, 0.18), transparent 18%), radial-gradient(circle at 16% 35%, rgba(238, 208, 145, 0.16), transparent 22%), linear-gradient(145deg, #fffefa 0%, #fcf5e9 100%)",
           }}
         >
           {/* Decorative background shapes */}
-          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#c59b3d]/5" />
+          <div className="pointer-events-none absolute -right-20 top-10 h-52 w-52 rounded-full border border-[#d8ae58]/20" />
 
-          <div className="pointer-events-none absolute -bottom-32 -left-32 h-72 w-72 rounded-full bg-[#d9bd7b]/10" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full border border-[#d8ae58]/15" />
 
-          <div className="relative z-10 flex h-full min-h-0 w-full max-w-[700px] flex-col justify-center">
-            {/* Mobile branding */}
-            <div className="mb-4 text-center lg:hidden">
+          <div className="relative z-10 w-full max-w-[430px]">
+            {showRegistration ? (
+              <form
+                className="space-y-3"
+                onSubmit={handleRegistrationSubmit}
+              >
+                <div className="text-center">
+                  <h2 className="font-serif text-[29px] font-bold leading-tight tracking-tight text-[#26395d] sm:text-[34px]">
+                    Create Your<br />Spiritual Child Account
+                  </h2>
+
+                  <p className="mx-auto mt-2 max-w-[320px] text-sm font-medium leading-5 text-[#8a8b91]">
+                    Register to connect with your spiritual father and begin your spiritual journey.
+                  </p>
+                </div>
+
+                <div className="pt-3">
+                  <label className="sr-only" htmlFor="baptismal-name">
+                    Baptismal Name
+                  </label>
+                  <div className="flex h-[52px] items-center gap-3 rounded-[10px] border border-[#e8dfd0] bg-white/85 px-4 text-[#9c9a92] shadow-sm focus-within:border-[#d3a346] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
+                    <UserRound className="h-[18px] w-[18px] shrink-0" />
+                    <input
+                      autoComplete="name"
+                      className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#45506a] outline-none placeholder:text-[#a3a19d]"
+                      id="baptismal-name"
+                      placeholder="Baptismal Name"
+                      type="text"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex h-[52px] items-center gap-3 rounded-[10px] border border-[#e8dfd0] bg-white/85 px-4 text-[#9c9a92] shadow-sm focus-within:border-[#d3a346] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
+                  <Mail className="h-[18px] w-[18px] shrink-0" />
+                  <label className="sr-only" htmlFor="registration-email">
+                    Email
+                  </label>
+                  <input
+                    autoComplete="email"
+                    className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#45506a] outline-none placeholder:text-[#a3a19d]"
+                    id="registration-email"
+                    placeholder="Email"
+                    type="email"
+                  />
+                  <button
+                    className="shrink-0 rounded-[9px] border border-[#d5a54b] px-3 py-1.5 text-xs font-semibold text-[#bd8424] transition-colors hover:bg-[#fff6e3]"
+                    type="button"
+                  >
+                    Send Code
+                  </button>
+                </div>
+
+                <div className="flex h-[52px] items-center gap-3 rounded-[10px] border border-[#e8dfd0] bg-white/85 px-4 text-[#9c9a92] shadow-sm focus-within:border-[#d3a346] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
+                  <ShieldCheck className="h-[18px] w-[18px] shrink-0" />
+                  <label className="sr-only" htmlFor="verification-code">
+                    Verification Code
+                  </label>
+                  <input
+                    autoComplete="one-time-code"
+                    className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#45506a] outline-none placeholder:text-[#a3a19d]"
+                    id="verification-code"
+                    placeholder="Verification Code"
+                    type="text"
+                  />
+                </div>
+
+                <div className="flex h-[52px] items-center gap-3 rounded-[10px] border border-[#e8dfd0] bg-white/85 px-4 text-[#9c9a92] shadow-sm focus-within:border-[#d3a346] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
+                  <LockKeyhole className="h-[18px] w-[18px] shrink-0" />
+                  <label className="sr-only" htmlFor="registration-password">
+                    Password
+                  </label>
+                  <input
+                    autoComplete="new-password"
+                    className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#45506a] outline-none placeholder:text-[#a3a19d]"
+                    id="registration-password"
+                    placeholder="Password"
+                    type={showPassword ? "text" : "password"}
+                  />
+                  <button
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#9c9a92] transition-colors hover:bg-[#f7efdf] hover:text-[#a17d36]"
+                    onClick={() => setShowPassword((current) => !current)}
+                    type="button"
+                  >
+                    {showPassword ? <EyeOff className="h-[19px] w-[19px]" /> : <Eye className="h-[19px] w-[19px]" />}
+                  </button>
+                </div>
+
+                <div className="flex h-[52px] items-center gap-3 rounded-[10px] border border-[#e8dfd0] bg-white/85 px-4 text-[#9c9a92] shadow-sm focus-within:border-[#d3a346] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
+                  <LockKeyhole className="h-[18px] w-[18px] shrink-0" />
+                  <label className="sr-only" htmlFor="confirm-password">
+                    Confirm Password
+                  </label>
+                  <input
+                    autoComplete="new-password"
+                    className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#45506a] outline-none placeholder:text-[#a3a19d]"
+                    id="confirm-password"
+                    placeholder="Confirm Password"
+                    type={showPassword ? "text" : "password"}
+                  />
+                  <button
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#9c9a92] transition-colors hover:bg-[#f7efdf] hover:text-[#a17d36]"
+                    onClick={() => setShowPassword((current) => !current)}
+                    type="button"
+                  >
+                    {showPassword ? <EyeOff className="h-[19px] w-[19px]" /> : <Eye className="h-[19px] w-[19px]" />}
+                  </button>
+                </div>
+
+                <button
+                  className="mt-2 flex h-[54px] w-full items-center justify-center gap-2.5 rounded-[15px] bg-gradient-to-r from-[#dcad4c] to-[#c98d21] text-base font-bold text-white shadow-[0_10px_22px_rgba(174,126,35,0.26)] transition-all hover:-translate-y-0.5 hover:from-[#d09a34] hover:to-[#b87814]"
+                  type="submit"
+                >
+                  Create Account
+                  <ArrowRight className="h-[19px] w-[19px]" />
+                </button>
+
+                <p className="pt-2 text-center text-xs font-medium text-[#7f8187] sm:text-sm">
+                  Already have an account?{" "}
+                  <button
+                    className="font-semibold text-[#ad8128] transition-colors hover:text-[#865f16]"
+                    onClick={() => setShowRegistration(false)}
+                    type="button"
+                  >
+                    Sign In
+                  </button>
+                </p>
+              </form>
+            ) : (
+              <>
+            <div className="text-center">
               <img
                 alt="Abune"
-                className="mx-auto h-16 w-auto object-contain"
+                className="mx-auto h-[106px] w-[106px] rounded-full object-cover shadow-[0_8px_24px_rgba(96,67,20,0.14)]"
                 src="/images/logo.png"
               />
 
-              <p className="mt-2 text-xs font-extrabold uppercase tracking-wide text-[#b48a32]">
-                Spiritual Father Portal
+              <h2 className="mt-6 font-serif text-[31px] font-bold tracking-tight text-[#26395d] sm:text-[34px]">
+                  Welcome Back
+              </h2>
+
+              <p className="mt-1 text-sm font-medium text-[#8a8b91]">
+                Sign in to your Abune account
               </p>
             </div>
 
-            <div className="rounded-[22px] border border-[#e3d3b5] bg-[#fffdfa]/95 px-5 py-5 shadow-[0_18px_46px_rgba(117,84,31,0.10)] backdrop-blur-sm sm:px-8 sm:py-6 lg:px-10 lg:py-7 xl:px-12">
-              <div>
-                <div className="mb-3 h-1 w-14 rounded-full bg-[#c59b3d]" />
-
-                <h2 className="text-[28px] font-extrabold tracking-tight text-[#b2862e] sm:text-[30px]">
-                  Welcome Back
-                </h2>
-
-                <p className="mt-1.5 text-sm font-medium text-[#5f6f91] sm:text-base">
-                  Sign in to your Spiritual Father portal
-                </p>
-              </div>
-
-              <form
-                className="mt-6 space-y-4"
-                onSubmit={handleSubmit}
-              >
+            <form
+              className="mt-7 space-y-4"
+              onSubmit={handleSubmit}
+            >
                 {/* Email */}
                 <div>
                   <label
-                    className="mb-2 block text-sm font-bold text-[#405377]"
+                    className="sr-only"
                     htmlFor="email-or-username"
                   >
-                    Email or Username
+                    Email
                   </label>
 
-                  <div className="flex h-[50px] items-center gap-3 rounded-[11px] border border-[#ddcfb5] bg-[#fffefb] px-4 text-[#a17d36] transition-all focus-within:border-[#c59b3d] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
-                    <Mail className="h-[19px] w-[19px] shrink-0" />
+                  <div className="flex h-[52px] items-center gap-3 rounded-[10px] border border-[#e8dfd0] bg-white/85 px-4 text-[#9c9a92] shadow-sm transition-all focus-within:border-[#d3a346] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
+                    <Mail className="h-[18px] w-[18px] shrink-0" />
 
                     <input
-                      autoComplete="username"
-                      className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#3f5070] outline-none placeholder:text-[#9296a1]"
+                      autoComplete="email"
+                      className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#45506a] outline-none placeholder:text-[#a3a19d]"
                       id="email-or-username"
                       onChange={(event) =>
                         setEmailOrUsername(
                           event.target.value,
                         )
                       }
-                      placeholder="Enter your email or username"
-                      type="text"
+                      placeholder="Email"
+                      type="email"
                       value={emailOrUsername}
                     />
                   </div>
@@ -208,23 +345,23 @@ const handleSubmit = async (
                 {/* Password */}
                 <div>
                   <label
-                    className="mb-2 block text-sm font-bold text-[#405377]"
+                    className="sr-only"
                     htmlFor="password"
                   >
                     Password
                   </label>
 
-                  <div className="flex h-[50px] items-center gap-3 rounded-[11px] border border-[#ddcfb5] bg-[#fffefb] px-4 text-[#a17d36] transition-all focus-within:border-[#c59b3d] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
-                    <LockKeyhole className="h-[19px] w-[19px] shrink-0" />
+                  <div className="flex h-[52px] items-center gap-3 rounded-[10px] border border-[#e8dfd0] bg-white/85 px-4 text-[#9c9a92] shadow-sm transition-all focus-within:border-[#d3a346] focus-within:ring-4 focus-within:ring-[#c59b3d]/10">
+                    <LockKeyhole className="h-[18px] w-[18px] shrink-0" />
 
                     <input
                       autoComplete="current-password"
-                      className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#3f5070] outline-none placeholder:text-[#9296a1]"
+                      className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#45506a] outline-none placeholder:text-[#a3a19d]"
                       id="password"
                       onChange={(event) =>
                         setPassword(event.target.value)
                       }
-                      placeholder="Enter your password"
+                      placeholder="Password"
                       type={
                         showPassword ? "text" : "password"
                       }
@@ -237,7 +374,7 @@ const handleSubmit = async (
                           ? "Hide password"
                           : "Show password"
                       }
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#7d8ba5] transition-colors hover:bg-[#f7efdf] hover:text-[#a17d36]"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#9c9a92] transition-colors hover:bg-[#f7efdf] hover:text-[#a17d36]"
                       onClick={() =>
                         setShowPassword(
                           (current) => !current,
@@ -256,10 +393,10 @@ const handleSubmit = async (
 
                 {/* Remember and forgot password */}
                 <div className="flex items-center justify-between gap-3">
-                  <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold text-[#536586]">
+                  <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#73777e]">
                     <input
                       checked={rememberMe}
-                      className="h-4 w-4 rounded border-[#cfc1a5] accent-[#b68a30]"
+                      className="h-3.5 w-3.5 rounded border-[#cfc1a5] accent-[#c89532]"
                       onChange={(event) =>
                         setRememberMe(
                           event.target.checked,
@@ -272,7 +409,7 @@ const handleSubmit = async (
                   </label>
 
                   <button
-                    className="text-sm font-semibold text-[#ad8128] transition-colors hover:text-[#865f16]"
+                    className="text-xs font-semibold text-[#bc8425] transition-colors hover:text-[#865f16]"
                     type="button"
                   >
                     Forgot password?
@@ -292,57 +429,45 @@ const handleSubmit = async (
                 {/* Sign in button */}
                 <button
                   className={cn(
-                    "flex h-[50px] w-full items-center justify-center gap-2.5 rounded-[10px] bg-gradient-to-r from-[#c59b3d] to-[#aa7b24] text-sm font-bold text-white shadow-[0_10px_24px_rgba(174,126,35,0.25)] transition-all hover:-translate-y-0.5 hover:from-[#b88c31] hover:to-[#966a1c] hover:shadow-[0_13px_28px_rgba(174,126,35,0.30)]",
+                    "flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[15px] bg-gradient-to-r from-[#dcad4c] to-[#c98d21] text-sm font-bold text-white shadow-[0_10px_22px_rgba(174,126,35,0.26)] transition-all hover:-translate-y-0.5 hover:from-[#d09a34] hover:to-[#b87814] hover:shadow-[0_13px_26px_rgba(174,126,35,0.30)]",
                     isSubmitting &&
                       "cursor-not-allowed opacity-70 hover:translate-y-0",
                   )}
                   disabled={isSubmitting}
                   type="submit"
                 >
-                  <LockKeyhole className="h-[19px] w-[19px]" />
-
                   {isSubmitting
                     ? "Signing In..."
                     : "Sign In"}
-                </button>
 
-                {/* Divider */}
-                <div className="flex items-center gap-4">
-                  <span className="h-px flex-1 bg-[#e3d7c1]" />
-
-                  <span className="text-xs font-medium text-[#7e8491]">
-                    or continue with
-                  </span>
-
-                  <span className="h-px flex-1 bg-[#e3d7c1]" />
-                </div>
-
-                {/* Google */}
-                <button
-                  className="flex h-[48px] w-full items-center justify-center gap-3 rounded-[10px] border border-[#ddcfb5] bg-[#fffefb] text-sm font-semibold text-[#4d5f80] transition-all hover:border-[#c9b481] hover:bg-[#fbf5e9]"
-                  type="button"
-                >
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full text-sm font-extrabold text-[#b48831]">
-                    G
-                  </span>
-
-                  Continue with Google
+                  <ArrowRight className="h-[18px] w-[18px]" />
                 </button>
 
                 {/* Administrator */}
-                <p className="text-center text-xs font-medium text-[#687591] sm:text-sm">
+                <p className="pt-3 text-center text-xs font-medium text-[#7f8187] sm:text-sm">
                   Don&apos;t have an account?{" "}
                   <button
                     className="font-semibold text-[#ad8128] transition-colors hover:text-[#865f16]"
+                    onClick={() => setShowRegistration(true)}
                     type="button"
                   >
-                    Contact administrator
+                    Register now
                   </button>
                 </p>
               </form>
+              </>
+            )}
+
+            <div
+              aria-hidden="true"
+              className="my-6 flex items-center gap-3 text-[#c99432]"
+            >
+              <span className="h-px flex-1 bg-[#eadfca]" />
+              <span className="text-lg leading-none">✣</span>
+              <span className="h-px flex-1 bg-[#eadfca]" />
             </div>
 
-            <p className="mt-3 text-center text-xs font-medium text-[#6e7d99] sm:text-sm">
+            <p className="text-center text-xs font-medium text-[#8f9093]">
               © 2026 Abune. All rights reserved.
             </p>
           </div>
