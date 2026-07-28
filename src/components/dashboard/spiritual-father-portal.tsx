@@ -40,11 +40,7 @@ export function SpiritualFatherPortal() {
   }
 
   if (!isAuthenticated) {
-    return (
-      <SpiritualFatherLogin
-        onLogin={() => setIsAuthenticated(true)}
-      />
-    );
+    return <SpiritualFatherLogin />;
   }
 
   return <DashboardShell />;
