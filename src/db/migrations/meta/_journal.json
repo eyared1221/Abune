@@ -50,6 +50,20 @@
       "when": 1785062945590,
       "tag": "0006_ambiguous_gressill",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785225285201,
+      "tag": "0007_rainy_arachne",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785240907636,
+      "tag": "0008_warm_kingpin",
+      "breakpoints": true
     }
   ]
 }

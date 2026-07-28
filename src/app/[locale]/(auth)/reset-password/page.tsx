@@ -1,10 +1,27 @@
-import { SectionPlaceholder } from "@/components/ui/section-placeholder";
+import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 
-export default function ResetPasswordPage() {
+type ResetPasswordPageProps = {
+  searchParams: Promise<{
+    error?: string | string[];
+    token?: string | string[];
+  }>;
+};
+
+function firstQueryValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function ResetPasswordPage({
+  searchParams,
+}: ResetPasswordPageProps) {
+  const query = await searchParams;
+  const token = firstQueryValue(query.token);
+  const error = firstQueryValue(query.error);
+
   return (
-    <SectionPlaceholder
-      title="Reset password"
-      description="Password reset confirmation flow will live here."
+    <ResetPasswordForm
+      token={token}
+      tokenError={Boolean(error)}
     />
   );
 }

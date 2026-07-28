@@ -1,28 +1,25 @@
-import "dotenv/config";
+import { config } from "dotenv";
 
-import { auth } from "../lib/auth";
-import { pool } from "../lib/db";
+config({ path: ".env.local" });
+config();
 
 async function createSpiritualFather() {
-  const name =
-    process.env.INITIAL_FATHER_NAME;
-  const email =
-    process.env.INITIAL_FATHER_EMAIL
-      ?.trim()
-      .toLowerCase();
-  const username =
-    process.env.INITIAL_FATHER_USERNAME
-      ?.trim()
-      .toLowerCase();
-  const password =
-    process.env.INITIAL_FATHER_PASSWORD;
+  const [{ auth }, { pool }, internalRegistration] = await Promise.all([
+    import("../lib/auth"),
+    import("../lib/db"),
+    import("../lib/internal-registration"),
+  ]);
 
-  if (
-    !name ||
-    !email ||
-    !username ||
-    !password
-  ) {
+  const name = process.env.INITIAL_FATHER_NAME;
+  const email = process.env.INITIAL_FATHER_EMAIL
+    ?.trim()
+    .toLowerCase();
+  const username = process.env.INITIAL_FATHER_USERNAME
+    ?.trim()
+    .toLowerCase();
+  const password = process.env.INITIAL_FATHER_PASSWORD;
+
+  if (!name || !email || !username || !password) {
     throw new Error(
       "Initial father environment variables are missing.",
     );
@@ -34,9 +31,7 @@ async function createSpiritualFather() {
     );
   }
 
-  const existingUser = await pool.query<{
-    id: string;
-  }>(
+  const existingUser = await pool.query<{ id: string }>(
     `
       SELECT id
       FROM "user"
@@ -55,6 +50,10 @@ async function createSpiritualFather() {
         username,
         displayUsername: username,
       },
+      headers: new Headers({
+        [internalRegistration.INTERNAL_REGISTRATION_HEADER]:
+          internalRegistration.getInternalRegistrationSecret(),
+      }),
     });
   }
 
@@ -65,7 +64,10 @@ async function createSpiritualFather() {
   }>(
     `
       UPDATE "user"
-      SET role = $1
+      SET
+        role = $1,
+        "emailVerified" = TRUE,
+        "updatedAt" = NOW()
       WHERE email = $2
       RETURNING id, email, role
     `,
@@ -78,16 +80,12 @@ async function createSpiritualFather() {
     );
   }
 
-  console.log(
-    `Spiritual-father account ready: ${email}`,
-  );
+  console.log(`Spiritual-father account ready: ${email}`);
+
+  await pool.end();
 }
 
-createSpiritualFather()
-  .catch((error: unknown) => {
-    console.error(error);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await pool.end();
-  });
+createSpiritualFather().catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});

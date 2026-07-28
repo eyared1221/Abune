@@ -6,11 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-
     "db:generate": "cross-env DB_USE_DIRECT=true drizzle-kit generate",
     "db:migrate": "cross-env DB_USE_DIRECT=true drizzle-kit migrate",
     "db:studio": "cross-env DB_USE_DIRECT=true drizzle-kit studio",
-
     "auth:migrate": "cross-env DB_USE_DIRECT=true npx auth@latest migrate --config ./src/lib/auth.ts --yes",
     "auth:generate": "cross-env DB_USE_DIRECT=true npx auth@latest generate --config ./src/lib/auth.ts --yes",
     "auth:create-father": "cross-env DB_USE_DIRECT=true tsx src/scripts/create-father.ts"
@@ -26,6 +24,7 @@
     "lucide-react": "^0.468.0",
     "next": "^15.0.0",
     "next-intl": "^4.13.2",
+    "nodemailer": "^9.0.3",
     "pg": "^8.22.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -34,6 +33,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",

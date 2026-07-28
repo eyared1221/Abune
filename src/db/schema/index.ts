@@ -5,3 +5,5 @@ export * from "./messages";
 export * from "./pastoral-notes";
 export * from "./spiritual-events";
 export * from "./availability";
+export * from "./father-invitations";
+export * from "./registration-email-otps";
