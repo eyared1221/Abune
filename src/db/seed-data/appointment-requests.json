@@ -1,0 +1,19 @@
+[
+  {
+    "seedKey": "request-mekdes-counseling-001",
+    "fatherEmail": "arsema2930@gmail.com",
+    "spiritualChildId": null,
+    "childName": "Eyerusalem Yared",
+    "availabilityEntryId": null,
+    "reason": "counseling",
+    "requestMessage": "I would like spiritual counseling about a personal matter.",
+    "status": "PENDING",
+    "requestedDate": "2026-07-30",
+    "requestedStartTime": "09:00",
+    "requestedEndTime": "09:45",
+    "meetingMethod": "in-person",
+    "location": "Church",
+    "responseNote": null,
+    "requestedAt": "2026-07-30T09:15:00+03:00"
+  }
+]

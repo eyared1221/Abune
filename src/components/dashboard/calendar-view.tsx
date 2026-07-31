@@ -52,6 +52,20 @@ function sameDate(first: Date, second: Date) {
   );
 }
 
+function isPastDate(date: Date, today: Date) {
+  const day = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  );
+  const currentDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+  return day < currentDay;
+}
+
 function calendarDays(year: number, month: number) {
   const firstDay = new Date(year, month, 1).getDay();
   const totalDays = new Date(year, month + 1, 0).getDate();
@@ -137,7 +151,9 @@ export function CalendarView() {
 
       if (result.success) {
         setEntries(result.data.entries);
-        const firstEntry = result.data.entries[0];
+        const firstEntry = result.data.entries.find(
+          (entry) => !isPastDate(new Date(`${entry.date}T00:00:00`), today),
+        );
 
         setSelectedDate((current) => {
           const selectedDateHasEntry = result.data.entries.some(
@@ -158,7 +174,7 @@ export function CalendarView() {
     return () => {
       active = false;
     };
-  }, [month]);
+  }, [month, today]);
 
   const days = useMemo(
     () => calendarDays(month.getFullYear(), month.getMonth()),
@@ -176,11 +192,17 @@ export function CalendarView() {
   );
 
   const selectedKey = dateKey(selectedDate);
+  const selectedDateIsPast = isPastDate(selectedDate, today);
   const selectedEntries = [...(byDate[selectedKey] ?? [])].sort((a, b) =>
     a.startTime.localeCompare(b.startTime),
   );
 
   const openCreate = () => {
+    if (selectedDateIsPast) {
+      setError("Availability cannot be created for a past date.");
+      return;
+    }
+
     setEditing(null);
     setError(null);
     setModalOpen(true);
@@ -249,7 +271,8 @@ export function CalendarView() {
           </div>
 
           <Button
-            className="h-11 rounded-[14px] bg-[#d4ab4f] px-5 font-bold text-white hover:bg-[#c49b3f]"
+            className="h-11 rounded-[14px] bg-[#d4ab4f] px-5 font-bold text-white hover:bg-[#c49b3f] disabled:cursor-not-allowed disabled:bg-[#c7cbd2]"
+            disabled={selectedDateIsPast}
             onClick={openCreate}
           >
             <Plus className="h-4 w-4" />
@@ -307,7 +330,6 @@ export function CalendarView() {
                         1,
                       );
                       setMonth(previous);
-                      setSelectedDate(previous);
                     }}
                     type="button"
                   >
@@ -356,10 +378,16 @@ export function CalendarView() {
                   const hasAvailability = (byDate[key] ?? []).length > 0;
                   const selected = sameDate(date, selectedDate);
                   const currentDay = sameDate(date, today);
+                  const pastDate = isPastDate(date, today);
 
                   return (
                     <button
                       key={key}
+                      aria-label={
+                        pastDate
+                          ? `${displayDate(date)} (past date)`
+                          : displayDate(date)
+                      }
                       className="group flex h-full flex-col items-center justify-center py-1"
                       onClick={() => {
                         setSelectedDate(date);
@@ -370,10 +398,14 @@ export function CalendarView() {
                       <span
                         className={cn(
                           "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold",
-                          selected
-                            ? "bg-[#c69a39] text-white"
-                            : "text-[#10295a] group-hover:bg-[#fcfaf6]",
-                          currentDay &&
+                          pastDate
+                            ? selected
+                              ? "bg-[#eef0f3] text-[#687386]"
+                              : "text-[#8b95ad] group-hover:bg-[#f5f6f8]"
+                            : selected
+                              ? "bg-[#c69a39] text-white"
+                              : "text-[#10295a] group-hover:bg-[#fcfaf6]",
+                          currentDay && !pastDate &&
                             !selected &&
                             "border border-[#c69a39] text-[#a47820]",
                         )}
@@ -383,7 +415,12 @@ export function CalendarView() {
 
                       <div className="mt-1.5 flex h-1.5 gap-1">
                         {hasAvailability ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#c69a39]" />
+                          <span
+                            className={cn(
+                              "h-1.5 w-1.5 rounded-full",
+                              pastDate ? "bg-[#9aa2af]" : "bg-[#c69a39]",
+                            )}
+                          />
                         ) : null}
                       </div>
                     </button>
@@ -391,11 +428,19 @@ export function CalendarView() {
                 })}
               </div>
 
-              <div className="mt-4 flex items-center gap-2 border-t border-[#e9e1d5] pt-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#c69a39]" />
-                <span className="text-xs font-semibold text-[#78849e]">
-                  Available
-                </span>
+              <div className="mt-4 flex items-center gap-4 border-t border-[#e9e1d5] pt-3">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#c69a39]" />
+                  <span className="text-xs font-semibold text-[#78849e]">
+                    Available
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#9aa2af]" />
+                  <span className="text-xs font-semibold text-[#78849e]">
+                    Past
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -408,12 +453,17 @@ export function CalendarView() {
                     {displayDate(selectedDate)}
                   </h2>
                   <p className="mt-1 text-xs font-semibold text-[#929bb0]">
-                    {loading ? "Loading..." : `${selectedEntries.length} calendar entries`}
+                    {loading
+                      ? "Loading..."
+                      : selectedDateIsPast
+                        ? `${selectedEntries.length} past ${selectedEntries.length === 1 ? "availability" : "availabilities"}`
+                        : `${selectedEntries.length} calendar entries`}
                   </p>
                 </div>
 
                 <button
-                  className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-[#f6efe1] text-[#a37d2d]"
+                  className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-[#f6efe1] text-[#a37d2d] disabled:cursor-not-allowed disabled:bg-[#f1f2f4] disabled:text-[#a0a7b3]"
+                  disabled={selectedDateIsPast}
                   onClick={openCreate}
                   type="button"
                 >
@@ -447,14 +497,18 @@ export function CalendarView() {
                         key={entry.id}
                         className={cn(
                           "rounded-[18px] border p-4",
-                          "border-[#e4d3a5] bg-[#fffdf8]",
+                          selectedDateIsPast
+                            ? "border-[#e1e4e8] bg-[#f7f8f9]"
+                            : "border-[#e4d3a5] bg-[#fffdf8]",
                         )}
                       >
                         <div className="flex items-start gap-3">
                           <div
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-[13px]",
-                              "bg-[#f8efd6] text-[#a47820]",
+                              selectedDateIsPast
+                                ? "bg-[#e9ecef] text-[#8490a0]"
+                                : "bg-[#f8efd6] text-[#a47820]",
                             )}
                           >
                             <CircleCheck className="h-5 w-5" />
@@ -472,14 +526,23 @@ export function CalendarView() {
                               <span
                                 className={cn(
                                   "rounded-full px-2.5 py-1 text-[10px] font-extrabold",
-                                  "bg-[#f8efd6] text-[#a47820]",
+                                  selectedDateIsPast
+                                    ? "bg-[#e9ecef] text-[#687386]"
+                                    : "bg-[#f8efd6] text-[#a47820]",
                                 )}
                               >
-                                Available
+                                {selectedDateIsPast ? "Expired" : "Available"}
                               </span>
                             </div>
 
-                            <div className="mt-3 space-y-2 text-xs font-semibold text-[#758098]">
+                            <div
+                              className={cn(
+                                "mt-3 space-y-2 text-xs font-semibold",
+                                selectedDateIsPast
+                                  ? "text-[#8a94a3]"
+                                  : "text-[#758098]",
+                              )}
+                            >
                               <p className="flex items-center gap-2">
                                     <MapPin className="h-3.5 w-3.5" />
                                     {methodLabels[entry.meetingMethod]} ·{" "}
@@ -489,9 +552,15 @@ export function CalendarView() {
                               {entry.notes ? (
                                 <p className="leading-5">{entry.notes}</p>
                               ) : null}
+
+                              {selectedDateIsPast ? (
+                                <p className="border-t border-[#e1e4e8] pt-3 leading-5 text-[#7e8795]">
+                                  This availability has passed and is no longer bookable.
+                                </p>
+                              ) : null}
                             </div>
 
-                            {entry.editable ? (
+                            {entry.editable && !selectedDateIsPast ? (
                               <div className="mt-4 flex justify-end gap-2 border-t border-black/[0.05] pt-3">
                                 <button
                                   className="flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 text-xs font-bold text-[#64708a] hover:bg-white"

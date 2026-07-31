@@ -1,10 +1,5 @@
-import { SectionPlaceholder } from "@/components/ui/section-placeholder";
+import { ChildAppointmentsView } from "@/components/dashboard/child-appointments-view";
 
 export default function ChildAppointmentsPage() {
-  return (
-    <SectionPlaceholder
-      title="Appointments"
-      description="Child appointment list and booking state will live here."
-    />
-  );
+  return <ChildAppointmentsView />;
 }

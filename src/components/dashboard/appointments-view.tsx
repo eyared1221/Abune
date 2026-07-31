@@ -1,482 +1,380 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck2,
   CalendarClock,
   CheckCircle2,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
-  Filter,
-  MoreHorizontal,
+  Plus,
   Search,
+  X,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import type {
+  AppointmentStatus,
+  FatherAppointmentListItem,
+  FatherAppointmentsResponse,
+} from "@/contracts/appointment";
 import { cn } from "@/lib/utils";
 
-const stats = [
-  {
-    label: "Total Appointments",
-    value: "24",
-    icon: CalendarClock,
-    iconClassName: "bg-[#ddb84f] text-[#18335f]",
-  },
-  {
-    label: "Upcoming",
-    value: "6",
-    icon: CalendarCheck2,
-    iconClassName: "bg-[#ddb84f] text-[#18335f]",
-  },
-  {
-    label: "Completed",
-    value: "3",
-    icon: Clock3,
-    iconClassName: "bg-[#ddb84f] text-[#18335f]",
-  },
-  {
-    label: "Canceled",
-    value: "18",
-    icon: CheckCircle2,
-    iconClassName: "bg-[#ddb84f] text-[#18335f]",
-  },
+const PAGE_SIZE = 8;
+const tabs = [
+  "All Appointments",
+  "Upcoming",
+  "Completed",
+  "Canceled",
 ] as const;
 
-const tabs = ["All Appointments", "Upcoming", "Completed", "Canceled"] as const;
+const typeLabels: Record<string, string> = {
+  confession: "Confession",
+  counseling: "Counseling",
+  repentance: "Repentance",
+  "spiritual-guidance": "Spiritual Guidance",
+  "family-issue": "Family Issues",
+  other: "Other",
+};
 
-const appointments = [
-  {
-    month: "May",
-    day: "20",
-    weekday: "Tue",
-    time: "10:30 AM",
-    initials: "MA",
-    name: "Mekdes Assefa",
-    phone: "0912 345 678",
-    avatarClassName: "bg-[#f8efdc] text-[#a37d2d]",
-    type: "Personal Meeting",
-    typeVariant: "warning" as const,
-    status: "Today",
-    statusVariant: "warning" as const,
-    highlighted: true,
-  },
-  {
-    month: "May",
-    day: "20",
-    weekday: "Tue",
-    time: "02:00 PM",
-    initials: "DG",
-    name: "Daniel Gebre",
-    phone: "0921 234 567",
-    avatarClassName: "bg-[#ddb84f] text-[#18335f]",
-    type: "Spiritual Counseling",
-    typeVariant: "success" as const,
-    status: "Today",
-    statusVariant: "warning" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "20",
-    weekday: "Tue",
-    time: "04:30 PM",
-    initials: "HT",
-    name: "Hanna Tesfaye",
-    phone: "0933 456 789",
-    avatarClassName: "bg-[#ffe9f0] text-[#ef476f]",
-    type: "Follow-up",
-    typeVariant: "info" as const,
-    status: "Today",
-    statusVariant: "warning" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "21",
-    weekday: "Wed",
-    time: "09:00 AM",
-    initials: "YB",
-    name: "Yonas Berhe",
-    phone: "0918 765 432",
-    avatarClassName: "bg-[#eaf1ff] text-[#4676ff]",
-    type: "Personal Meeting",
-    typeVariant: "warning" as const,
-    status: "Upcoming",
-    statusVariant: "warning" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "21",
-    weekday: "Wed",
-    time: "11:30 AM",
-    initials: "RM",
-    name: "Rachel Michael",
-    phone: "0924 567 890",
-    avatarClassName: "bg-[#f8efdc] text-[#a37d2d]",
-    type: "Spiritual Counseling",
-    typeVariant: "success" as const,
-    status: "Upcoming",
-    statusVariant: "warning" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "22",
-    weekday: "Thu",
-    time: "10:00 AM",
-    initials: "SB",
-    name: "Samuel Bekele",
-    phone: "0911 223 344",
-    avatarClassName: "bg-[#fff2da] text-[#f59e0b]",
-    type: "Follow-up",
-    typeVariant: "info" as const,
-    status: "Upcoming",
-    statusVariant: "warning" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "23",
-    weekday: "Fri",
-    time: "03:00 PM",
-    initials: "AT",
-    name: "Aster Tadesse",
-    phone: "0932 334 455",
-    avatarClassName: "bg-[#e9fff7] text-[#31a97f]",
-    type: "Personal Meeting",
-    typeVariant: "warning" as const,
-    status: "Upcoming",
-    statusVariant: "warning" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "24",
-    weekday: "Sat",
-    time: "09:30 AM",
-    initials: "TG",
-    name: "Tigist Gebremedhin",
-    phone: "0915 667 788",
-    avatarClassName: "bg-[#ffe9f5] text-[#ef476f]",
-    type: "Spiritual Counseling",
-    typeVariant: "success" as const,
-    status: "Upcoming",
-    statusVariant: "warning" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "18",
-    weekday: "Sun",
-    time: "08:30 AM",
-    initials: "MS",
-    name: "Mihret Solomon",
-    phone: "0917 889 900",
-    avatarClassName: "bg-[#e7fff8] text-[#22a67a]",
-    type: "Personal Meeting",
-    typeVariant: "warning" as const,
-    status: "Completed",
-    statusVariant: "success" as const,
-    highlighted: false,
-  },
-  {
-    month: "May",
-    day: "17",
-    weekday: "Sat",
-    time: "02:00 PM",
-    initials: "BT",
-    name: "Biniam Tesfaye",
-    phone: "0912 111 222",
-    avatarClassName: "bg-[#edf2ff] text-[#4f7bff]",
-    type: "Follow-up",
-    typeVariant: "info" as const,
-    status: "Completed",
-    statusVariant: "success" as const,
-    highlighted: false,
-  },
-] as const;
+type AppointmentTab = (typeof tabs)[number];
+type AppointmentAction = "COMPLETE" | "CANCEL" | "REOPEN";
+type CanonTaskDraft = { id: string; isSelected: boolean; guidance: string };
 
-const chartLabels = ["Apr 20-26", "Apr 27-May 3", "May 4-10", "May 11-17", "May 18-24"] as const;
+function formatDateParts(value: string) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? new Date(`${value}T00:00:00`)
+    : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return { day: "--", month: "Date", weekday: "" };
+  }
+
+  return {
+    day: new Intl.DateTimeFormat("en-US", { day: "numeric" }).format(date),
+    month: new Intl.DateTimeFormat("en-US", { month: "short" }).format(date),
+    weekday: new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date),
+  };
+}
+
+function formatTime(value: string) {
+  const [hourText = "0", minute = "00"] = value.split(":");
+  const hour = Number(hourText);
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+  return `${displayHour}:${minute} ${suffix}`;
+}
+
+function isToday(scheduleDate: string) {
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return scheduleDate.slice(0, 10) === today;
+}
+
+function statusLabel(appointment: FatherAppointmentListItem) {
+  switch (appointment.status) {
+    case "CONFIRMED":
+      return isToday(appointment.scheduleDate) ? "Today" : "Upcoming";
+    case "COMPLETED":
+      return "Completed";
+    case "CANCELLED":
+      return "Canceled";
+    case "NO_SHOW":
+      return "No show";
+    case "RESCHEDULED":
+      return "Rescheduled";
+  }
+}
+
+function statusVariant(status: AppointmentStatus) {
+  switch (status) {
+    case "CONFIRMED": return "warning" as const;
+    case "COMPLETED": return "success" as const;
+    case "CANCELLED": return "danger" as const;
+    case "RESCHEDULED": return "info" as const;
+    case "NO_SHOW": return "neutral" as const;
+  }
+}
+
+function typeVariant(reason: string) {
+  if (reason === "spiritual-guidance") return "success" as const;
+  if (reason === "family-issue") return "danger" as const;
+  if (reason === "repentance") return "info" as const;
+  if (reason === "confession" || reason === "counseling") return "violet" as const;
+  return "warning" as const;
+}
+
+function tabMatches(appointment: FatherAppointmentListItem, tab: AppointmentTab) {
+  if (tab === "All Appointments") return true;
+  if (tab === "Upcoming") return appointment.status === "CONFIRMED";
+  if (tab === "Completed") return appointment.status === "COMPLETED";
+  return appointment.status === "CANCELLED";
+}
 
 export function AppointmentsView() {
+  const [appointments, setAppointments] = useState<FatherAppointmentListItem[]>([]);
+  const [activeTab, setActiveTab] = useState<AppointmentTab>("All Appointments");
+  const [searchText, setSearchText] = useState("");
+  const [selectedType, setSelectedType] = useState("All Types");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [updatingAppointmentId, setUpdatingAppointmentId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [canonAppointment, setCanonAppointment] = useState<FatherAppointmentListItem | null>(null);
+  const [canonTasks, setCanonTasks] = useState<CanonTaskDraft[]>([]);
+  const [fethaDate, setFethaDate] = useState("");
+  const [fethaTime, setFethaTime] = useState("");
+  const [canonError, setCanonError] = useState<string | null>(null);
+  const [isSavingCanon, setIsSavingCanon] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadAppointments = async () => {
+      try {
+        const response = await fetch("/api/appointments", { cache: "no-store" });
+        const body = (await response.json()) as FatherAppointmentsResponse | { error?: string };
+        if (!response.ok) {
+          throw new Error("error" in body ? body.error ?? "Unable to load appointments." : "Unable to load appointments.");
+        }
+        if (!cancelled) setAppointments((body as FatherAppointmentsResponse).appointments);
+      } catch (loadError: unknown) {
+        if (!cancelled) setError(loadError instanceof Error ? loadError.message : "Unable to load appointments.");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    void loadAppointments();
+    return () => { cancelled = true; };
+  }, []);
+
+  const typeOptions = useMemo(() => [
+    "All Types",
+    ...Array.from(new Set(appointments.map((appointment) => typeLabels[appointment.reason] ?? appointment.reason))).sort(),
+  ], [appointments]);
+
+  const filteredAppointments = useMemo(() => {
+    const query = searchText.trim().toLowerCase();
+    return appointments.filter((appointment) => {
+      const type = typeLabels[appointment.reason] ?? appointment.reason;
+      return tabMatches(appointment, activeTab)
+        && (selectedType === "All Types" || type === selectedType)
+        && (!query || [appointment.childName, appointment.childPhone ?? "", type]
+          .some((value) => value.toLowerCase().includes(query)));
+    });
+  }, [activeTab, appointments, searchText, selectedType]);
+
+  const stats = useMemo(() => [
+    { icon: CalendarClock, label: "Total Appointments", value: appointments.length },
+    { icon: CalendarCheck2, label: "Upcoming", value: appointments.filter((item) => item.status === "CONFIRMED").length },
+    { icon: Clock3, label: "Completed", value: appointments.filter((item) => item.status === "COMPLETED").length },
+    { icon: CheckCircle2, label: "Canceled", value: appointments.filter((item) => item.status === "CANCELLED").length },
+  ], [appointments]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const visibleAppointments = filteredAppointments.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const firstShown = filteredAppointments.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const lastShown = Math.min(safePage * PAGE_SIZE, filteredAppointments.length);
+
+  useEffect(() => { setCurrentPage(1); }, [activeTab, searchText, selectedType]);
+
+  const updateAppointment = async (appointment: FatherAppointmentListItem, action: AppointmentAction) => {
+    if (updatingAppointmentId) return;
+    setUpdatingAppointmentId(appointment.id);
+    setError(null);
+    try {
+      const response = await fetch(`/api/appointments/${appointment.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const body = (await response.json()) as { appointment?: { id: string; status: AppointmentStatus }; error?: string };
+      if (!response.ok || !body.appointment) throw new Error(body.error ?? "Unable to update the appointment.");
+      setAppointments((items) => items.map((item) => item.id === body.appointment?.id ? { ...item, status: body.appointment.status } : item));
+      setActiveTab(action === "COMPLETE" ? "Completed" : action === "CANCEL" ? "Canceled" : "Upcoming");
+    } catch (updateError: unknown) {
+      setError(updateError instanceof Error ? updateError.message : "Unable to update the appointment.");
+    } finally {
+      setUpdatingAppointmentId(null);
+    }
+  };
+
+  const openCanonDialog = (appointment: FatherAppointmentListItem) => {
+    setCanonAppointment(appointment);
+    setCanonTasks([
+      { id: "first-guidance", isSelected: true, guidance: "" },
+    ]);
+    setFethaDate(appointment.scheduleDate.slice(0, 10));
+    setFethaTime("");
+    setCanonError(null);
+  };
+
+  const closeCanonDialog = () => {
+    if (!isSavingCanon) {
+      setCanonAppointment(null);
+      setCanonError(null);
+    }
+  };
+
+  const saveCanon = async () => {
+    if (!canonAppointment || isSavingCanon) return;
+
+    const tasks = canonTasks
+      .filter((task) => task.isSelected)
+      .map((task) => task.guidance.trim())
+      .filter(Boolean);
+
+    if (tasks.length === 0 || !fethaDate || !fethaTime) {
+      setCanonError("Add at least one guidance item and choose the Fetha date and time.");
+      return;
+    }
+
+    setIsSavingCanon(true);
+    setCanonError(null);
+    try {
+      const response = await fetch("/api/canons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appointmentId: canonAppointment.id,
+          tasks,
+          fethaDate,
+          fethaTime,
+        }),
+      });
+      const body = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        throw new Error(body.error ?? "Unable to save the canon.");
+      }
+      setCanonAppointment(null);
+    } catch (saveError: unknown) {
+      setCanonError(saveError instanceof Error ? saveError.message : "Unable to save the canon.");
+    } finally {
+      setIsSavingCanon(false);
+    }
+  };
+
   return (
     <>
       <section className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map(
-          ({
-            icon: Icon,
-            label,
-            value,
-          }) => (
-            <div
-              key={label}
-              className="group relative min-h-[190px] overflow-hidden rounded-[24px] border border-[#ebe5d9] bg-[#fdfcf9] px-7 py-6 shadow-[0_10px_30px_rgba(26,38,67,0.07)] transition-all duration-300 hover:-translate-y-1 hover:border-[#d9c79e] hover:shadow-[0_18px_40px_rgba(26,38,67,0.12)]"
-            >
-              <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-[#d7b04d]/[0.07] transition-transform duration-500 group-hover:scale-125" />
-
-              <div className="relative z-10">
-                <div className="flex h-[58px] w-[58px] items-center justify-center rounded-[18px] bg-[#ddb84f] text-[#18335f] shadow-[0_7px_16px_rgba(205,163,58,0.24)] ring-1 ring-black/[0.025] transition-transform duration-300 group-hover:scale-105">
-                  <Icon className="h-7 w-7" strokeWidth={1.9} />
-                </div>
-
-                <div className="mt-6">
-                  <p className="text-[38px] font-extrabold leading-none tracking-tight text-[#17223f]">
-                    {value}
-                  </p>
-
-                  <p className="mt-3 text-[18px] font-bold text-[#263453]">
-                    {label}
-                  </p>
-                </div>
-              </div>
-
-              <div className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-[#b99645] to-[#e0bf68] transition-transform duration-300 group-hover:scale-x-100" />
+        {stats.map(({ icon: Icon, label, value }) => (
+          <div key={label} className="group relative min-h-[174px] overflow-hidden rounded-[24px] border border-[#ebe5d9] bg-[#fdfcf9] px-7 py-6 shadow-[0_10px_30px_rgba(26,38,67,0.07)]">
+            <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-[#d7b04d]/[0.07]" />
+            <div className="relative z-10">
+              <div className="flex h-[58px] w-[58px] items-center justify-center rounded-[18px] bg-[#ddb84f] text-[#18335f] shadow-[0_7px_16px_rgba(205,163,58,0.24)]"><Icon className="h-7 w-7" strokeWidth={1.9} /></div>
+              <p className="mt-6 text-[42px] font-extrabold leading-none tracking-tight text-[#17223f]">{value}</p>
+              <p className="mt-3 text-[18px] font-bold text-[#263453]">{label}</p>
             </div>
-          ),
-        )}
+          </div>
+        ))}
       </section>
 
       <div className="mt-6">
         <Card className="rounded-[26px] border border-[#ebe5d9] bg-[#fdfcf9] shadow-[0_12px_32px_rgba(26,38,67,0.07)]">
           <CardContent className="p-0">
             <div className="grid grid-cols-2 border-b border-[#ebe5d9] text-sm font-bold text-[#6b7695] md:grid-cols-4">
-              {tabs.map((tab, index) => (
-                <button
-                  key={tab}
-                  type="button"
-                  className={cn(
-                    "border-b-2 px-4 py-5 text-center transition-colors",
-                    index === 0 ? "border-[#b99645] text-[#a47e2d]" : "border-transparent hover:text-[#1d2859]",
-                  )}
-                >
-                  {tab}
-                </button>
-              ))}
+              {tabs.map((tab) => <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={cn("border-b-2 px-4 py-5 text-center transition-colors", activeTab === tab ? "border-[#b99645] text-[#a47e2d]" : "border-transparent hover:text-[#1d2859]")}>{tab}</button>)}
             </div>
-
             <div className="p-4 sm:p-6">
               <div className="flex flex-col gap-4 lg:flex-row">
-                <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-[#e7dfcf] bg-[#fffdf9] px-4 py-3 text-[#7b86a7]">
+                <label className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-[#e7dfcf] bg-[#fffdf9] px-4 py-3 text-[#7b86a7]">
                   <Search className="h-5 w-5 shrink-0" />
-                  <span className="truncate text-sm font-semibold">Search by name or phone...</span>
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <button
-                    className="flex items-center justify-between gap-4 rounded-2xl border border-[#e7dfcf] bg-[#fffdf9] px-4 py-3 text-sm font-semibold text-[#4c5678] sm:min-w-[120px]"
-                    type="button"
-                  >
-                    All Status
-                    <ChevronDown className="h-4 w-4 text-[#97a0bb]" />
-                  </button>
-
-                  <button
-                    className="flex items-center justify-between gap-4 rounded-2xl border border-[#e7dfcf] bg-[#fffdf9] px-4 py-3 text-sm font-semibold text-[#4c5678] sm:min-w-[120px]"
-                    type="button"
-                  >
-                    All Types
-                    <ChevronDown className="h-4 w-4 text-[#97a0bb]" />
-                  </button>
-
-                  <button
-                    className="flex items-center justify-center gap-2 rounded-2xl border border-[#e7dfcf] bg-[#fffdf9] px-4 py-3 text-sm font-semibold text-[#4c5678] sm:min-w-[90px]"
-                    type="button"
-                  >
-                    <Filter className="h-4 w-4" />
-                    Filter
-                  </button>
+                  <input className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#33415f] outline-none placeholder:text-[#7b86a7]" onChange={(event) => setSearchText(event.target.value)} placeholder="Search by name or phone..." value={searchText} />
+                </label>
+                <select aria-label="Filter appointments by type" className="rounded-2xl border border-[#e7dfcf] bg-[#fffdf9] px-4 py-3 text-sm font-semibold text-[#4c5678] outline-none" onChange={(event) => setSelectedType(event.target.value)} value={selectedType}>
+                  {typeOptions.map((type) => <option key={type}>{type}</option>)}
+                </select>
+              </div>
+              {error ? <div className="mt-4 rounded-2xl border border-[#f1c7c4] bg-[#fff5f4] px-4 py-3 text-sm font-semibold text-[#b7443e]">{error}</div> : null}
+              <div className="mt-6 overflow-x-auto border border-[#ebe5d9]">
+                <div className="min-w-[900px]">
+                  <div className="grid grid-cols-[1.2fr_1.6fr_1.1fr_1fr_270px] items-center gap-4 border-b border-[#eee9df] bg-[#faf8f3] px-7 py-4 text-[13px] font-extrabold uppercase tracking-[0.06em] text-[#7b8499]"><p>Date &amp; Time</p><p>Spiritual Child</p><p>Type</p><p>Status</p><p className="text-right">Actions</p></div>
+                  <div className="divide-y divide-[#f0ece4] bg-white">
+                    {isLoading ? <p className="px-7 py-14 text-center text-sm font-semibold text-[#7b8499]">Loading appointments...</p> : visibleAppointments.length === 0 ? <p className="px-7 py-14 text-center text-sm font-semibold text-[#7b8499]">No appointments match the selected filters.</p> : visibleAppointments.map((appointment) => {
+                      const date = formatDateParts(appointment.scheduleDate);
+                      const type = typeLabels[appointment.reason] ?? appointment.reason;
+                      const isUpdating = updatingAppointmentId === appointment.id;
+                      return <div key={appointment.id} className="grid grid-cols-[1.2fr_1.6fr_1.1fr_1fr_270px] items-center gap-4 px-7 py-4 transition-colors hover:bg-[#fcfaf6]">
+                        <div className="flex items-center gap-3"><div className="flex h-14 w-14 flex-col items-center justify-center rounded-[16px] bg-[#f7f2e8] text-center"><span className="text-xs font-bold uppercase tracking-wide text-[#7b86a7]">{date.month}</span><span className="text-xl font-extrabold leading-none text-[#1d2859]">{date.day}</span><span className="text-xs font-semibold text-[#7b86a7]">{date.weekday}</span></div><p className="text-sm font-extrabold text-[#1d2859]">{formatTime(appointment.startTime)}</p></div>
+                        <div className="min-w-0"><p className="truncate text-[15px] font-extrabold text-[#1d2859]">{appointment.childName}</p>{appointment.childPhone ? <p className="mt-1 text-sm font-medium text-[#8992a7]">{appointment.childPhone}</p> : null}</div>
+                        <Badge variant={typeVariant(appointment.reason)} className="w-fit rounded-full px-3 py-1">{type}</Badge>
+                        <Badge variant={statusVariant(appointment.status)} className="w-fit rounded-full px-3 py-1">{statusLabel(appointment)}</Badge>
+                        <div className="flex justify-end gap-2">{appointment.status === "CONFIRMED" ? <><button className="rounded-[10px] bg-[#d4ab4f] px-3 py-2 text-xs font-bold text-white hover:bg-[#c49b3f] disabled:opacity-60" disabled={isUpdating} onClick={() => void updateAppointment(appointment, "COMPLETE")} type="button">Complete</button><button className="rounded-[10px] border border-[#e67670] bg-white px-3 py-2 text-xs font-bold text-[#cf4f48] hover:bg-[#fff4f3] disabled:opacity-60" disabled={isUpdating} onClick={() => void updateAppointment(appointment, "CANCEL")} type="button">Cancel</button></> : appointment.status === "COMPLETED" ? <><button className="rounded-[10px] border border-[#d7c391] bg-white px-3 py-2 text-xs font-bold text-[#9b7525] hover:bg-[#faf4e5]" onClick={() => openCanonDialog(appointment)} type="button">Add Canon</button><button className="rounded-[10px] border border-[#d7c391] bg-white px-3 py-2 text-xs font-bold text-[#9b7525] hover:bg-[#faf4e5] disabled:opacity-60" disabled={isUpdating} onClick={() => void updateAppointment(appointment, "REOPEN")} type="button">Restore to Upcoming</button></> : appointment.status === "CANCELLED" ? <button className="rounded-[10px] border border-[#d7c391] bg-white px-3 py-2 text-xs font-bold text-[#9b7525] hover:bg-[#faf4e5] disabled:opacity-60" disabled={isUpdating} onClick={() => void updateAppointment(appointment, "REOPEN")} type="button">Restore to Upcoming</button> : <span className="text-sm font-semibold text-[#8a93a7]">No actions</span>}</div>
+                      </div>;
+                    })}
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-6 hidden overflow-x-auto md:block">
-                <div className="min-w-[980px]">
-                <div className="grid grid-cols-[1.2fr_1.7fr_1.2fr_1fr_100px] items-center gap-4 border-b border-[#eee9df] bg-[#faf8f3] px-7 py-4 text-[13px] font-extrabold uppercase tracking-[0.06em] text-[#7b8499]">
-                  <p>Date &amp; Time</p>
-                  <p>Spiritual Child</p>
-                  <p>Type</p>
-                  <p>Status</p>
-                  <p className="text-right">Actions</p>
-                </div>
-
-                <div className="divide-y divide-[#f0ece4]">
-                  {appointments.map((appointment) => (
-                    <div
-                      key={`${appointment.name}-${appointment.time}`}
-                      className={cn(
-                        "group grid grid-cols-[1.2fr_1.7fr_1.2fr_1fr_100px] items-center gap-4 px-7 py-4 transition-all duration-200 hover:bg-[#fcfaf6]",
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-14 w-14 flex-col items-center justify-center rounded-[16px] bg-[#f7f2e8] text-center">
-                          <span className="text-xs font-bold uppercase tracking-wide text-[#7b86a7]">{appointment.month}</span>
-                          <span className="text-xl font-extrabold leading-none text-[#1d2859]">{appointment.day}</span>
-                          <span className="text-xs font-semibold text-[#7b86a7]">{appointment.weekday}</span>
-                        </div>
-                        <p className="text-sm font-extrabold text-[#1d2859]">{appointment.time}</p>
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="min-w-0">
-                          <p className="truncate text-[15px] font-extrabold text-[#1d2859]">{appointment.name}</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Badge variant={appointment.typeVariant} className="rounded-full px-3 py-1">
-                          {appointment.type}
-                        </Badge>
-                      </div>
-
-                      <div>
-                        <Badge variant={appointment.statusVariant} className="rounded-full px-3 py-1">
-                          {appointment.status}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center justify-end">
-                        <button
-                          className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-transparent text-[#7d86a7] transition-all hover:border-[#e7dfcf] hover:bg-white hover:text-[#a47e2d] hover:shadow-sm"
-                          type="button"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                </div>
-              </div>
-
-              <div className="mt-5 flex flex-col gap-4 text-sm font-semibold text-[#4c5678] sm:flex-row sm:items-center sm:justify-between">
-                <p>Showing 1 to 10 of 24 appointments</p>
-
-                <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <button
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7dfcf] bg-[#fffdf9] text-[#7d86a7]"
-                    type="button"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#b99645] text-sm font-bold text-white" type="button">
-                    1
-                  </button>
-                  <button
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7dfcf] bg-[#fffdf9] text-sm font-bold text-[#4c5678]"
-                    type="button"
-                  >
-                    2
-                  </button>
-                  <button
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7dfcf] bg-[#fffdf9] text-sm font-bold text-[#4c5678]"
-                    type="button"
-                  >
-                    3
-                  </button>
-                  <button
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7dfcf] bg-white text-[#4c5678]"
-                    type="button"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+              <div className="mt-5 flex flex-col gap-4 text-sm font-semibold text-[#4c5678] sm:flex-row sm:items-center sm:justify-between"><p>Showing {firstShown} to {lastShown} of {filteredAppointments.length} appointments</p><div className="flex items-center gap-2 self-start sm:self-auto"><button aria-label="Previous page" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7dfcf] bg-[#fffdf9] text-[#7d86a7] disabled:opacity-40" disabled={safePage <= 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} type="button"><ChevronLeft className="h-4 w-4" /></button><span className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-[#b99645] px-3 text-sm font-bold text-white">{safePage}</span><button aria-label="Next page" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7dfcf] bg-[#fffdf9] text-[#4c5678] disabled:opacity-40" disabled={safePage >= totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} type="button"><ChevronRight className="h-4 w-4" /></button></div></div>
             </div>
           </CardContent>
         </Card>
-
       </div>
 
-      <Card className="mt-6 rounded-[26px] border border-[#ebe5d9] bg-[#fdfcf9] shadow-[0_12px_32px_rgba(26,38,67,0.07)]">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle>Appointments Overview</CardTitle>
-          <button className="text-sm font-bold text-[#a47e2d] hover:text-[#8d6b22]" type="button">
-            View Calendar
-          </button>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-5 text-sm font-semibold text-[#4c5678]">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#b99645]" />
-              Scheduled
+      {canonAppointment ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+          <button
+            aria-label="Close add canon dialog"
+            className="absolute inset-0 bg-[#17223f]/45 backdrop-blur-sm"
+            onClick={closeCanonDialog}
+            type="button"
+          />
+          <div
+            aria-labelledby="canon-dialog-title"
+            aria-modal="true"
+            className="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-[600px] overflow-y-auto rounded-[24px] border border-[#eee4d4] bg-white p-6 shadow-[0_24px_64px_rgba(23,34,63,0.22)]"
+            role="dialog"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="canon-dialog-title" className="text-2xl font-extrabold text-[#1d2b51]">Add Canon</h2>
+                <p className="mt-2 text-sm font-medium text-[#6d7892]">Guidance for <span className="font-extrabold text-[#1d2b51]">{canonAppointment.childName}</span></p>
+              </div>
+              <button aria-label="Close add canon dialog" className="flex h-9 w-9 items-center justify-center rounded-full text-[#71809b] hover:bg-[#f7f3eb]" disabled={isSavingCanon} onClick={closeCanonDialog} type="button"><X className="h-5 w-5" /></button>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#2eaf67]" />
-              Completed
+
+            <div className="mt-5 rounded-2xl border border-[#eee7da] bg-[#fcfaf6] p-4">
+              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#8b93a5]">Appointment Summary</p>
+              <dl className="mt-4 grid grid-cols-[110px_1fr] gap-x-4 gap-y-3 text-sm">
+                <dt className="font-bold text-[#758098]">Child</dt><dd className="font-extrabold text-[#263453]">{canonAppointment.childName}</dd>
+                <dt className="font-bold text-[#758098]">Date</dt><dd className="font-extrabold text-[#263453]">{formatDateParts(canonAppointment.scheduleDate).month} {formatDateParts(canonAppointment.scheduleDate).day}, {canonAppointment.scheduleDate.slice(0, 4)}</dd>
+                <dt className="font-bold text-[#758098]">Time</dt><dd className="font-extrabold text-[#263453]">{formatTime(canonAppointment.startTime)}–{formatTime(canonAppointment.endTime)}</dd>
+              </dl>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#ef476f]" />
-              Canceled
+
+            <div className="mt-5">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-bold text-[#33415f]">Canon guidance checklist</p>
+                <button className="flex items-center gap-1 text-sm font-bold text-[#9b7525] hover:text-[#7d5d1d]" onClick={() => setCanonTasks((tasks) => [...tasks, { id: `guidance-${Date.now()}-${tasks.length}`, isSelected: true, guidance: "" }])} type="button"><Plus className="h-4 w-4" />Add item</button>
+              </div>
+              <p className="mt-1 text-sm text-[#7d89a3]">Check each guidance item you want to save for the child.</p>
+              <div className="mt-3 space-y-2">
+                {canonTasks.map((task) => (
+                  <div key={task.id} className="flex items-center gap-3 rounded-xl border border-[#e4e0d8] bg-white px-3 py-2">
+                    <input aria-label="Include guidance item" checked={task.isSelected} className="h-4 w-4 accent-[#b99645]" onChange={(event) => setCanonTasks((tasks) => tasks.map((item) => item.id === task.id ? { ...item, isSelected: event.target.checked } : item))} type="checkbox" />
+                    <input className="min-w-0 flex-1 bg-transparent py-1 text-sm font-medium text-[#253252] outline-none placeholder:text-[#9ba4b6]" onChange={(event) => setCanonTasks((tasks) => tasks.map((item) => item.id === task.id ? { ...item, guidance: event.target.value } : item))} placeholder="Add the father’s guidance for the child..." value={task.guidance} />
+                    {canonTasks.length > 1 ? <button aria-label="Remove guidance item" className="text-[#9ba4b6] hover:text-[#cf4f48]" onClick={() => setCanonTasks((tasks) => tasks.filter((item) => item.id !== task.id))} type="button"><X className="h-4 w-4" /></button> : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-bold text-[#33415f]">Fetha date<input className="mt-2 h-11 w-full rounded-[12px] border border-[#e4e0d8] px-3 text-sm font-medium text-[#253252] outline-none focus:border-[#c5a860]" onChange={(event) => setFethaDate(event.target.value)} required type="date" value={fethaDate} /></label>
+              <label className="text-sm font-bold text-[#33415f]">Fetha time<input className="mt-2 h-11 w-full rounded-[12px] border border-[#e4e0d8] px-3 text-sm font-medium text-[#253252] outline-none focus:border-[#c5a860]" onChange={(event) => setFethaTime(event.target.value)} required type="time" value={fethaTime} /></label>
+            </div>
+
+            {canonError ? <p className="mt-3 text-sm font-semibold text-[#b7443e]">{canonError}</p> : null}
+
+            <div className="mt-6 flex gap-3">
+              <button className="h-11 flex-1 rounded-[12px] border border-[#ded8cd] bg-white px-4 text-sm font-bold text-[#56627c] hover:bg-[#faf8f4] disabled:opacity-50" disabled={isSavingCanon} onClick={closeCanonDialog} type="button">Cancel</button>
+              <button className="h-11 flex-1 rounded-[12px] bg-[#b99645] px-4 text-sm font-bold text-white hover:bg-[#a78336] disabled:opacity-60" disabled={isSavingCanon} onClick={() => void saveCanon()} type="button">{isSavingCanon ? "Saving..." : "Save Canon"}</button>
             </div>
           </div>
-
-          <div className="mt-6 overflow-x-auto">
-            <div className="min-w-[760px]">
-              <svg viewBox="0 0 760 220" className="h-[220px] w-full">
-                <line x1="50" y1="20" x2="50" y2="190" stroke="#e7dfcf" />
-                <line x1="50" y1="190" x2="730" y2="190" stroke="#e7dfcf" />
-
-                {[40, 80, 120, 160].map((y) => (
-                  <line key={y} x1="50" y1={y} x2="730" y2={y} stroke="#f4efe5" />
-                ))}
-
-                <polyline
-                  fill="none"
-                  stroke="#b99645"
-                  strokeWidth="3"
-                  points="90,135 240,90 390,65 540,52 690,60"
-                />
-                <polyline
-                  fill="none"
-                  stroke="#2eaf67"
-                  strokeWidth="3"
-                  points="90,160 240,145 390,132 540,108 690,92"
-                />
-                <polyline
-                  fill="none"
-                  stroke="#ef476f"
-                  strokeWidth="3"
-                  points="90,152 240,150 390,165 540,160 690,164"
-                />
-
-                {[
-                  { x: 90, y: 135, color: "#b99645" },
-                  { x: 240, y: 90, color: "#b99645" },
-                  { x: 390, y: 65, color: "#b99645" },
-                  { x: 540, y: 52, color: "#b99645" },
-                  { x: 690, y: 60, color: "#b99645" },
-                  { x: 90, y: 160, color: "#2eaf67" },
-                  { x: 240, y: 145, color: "#2eaf67" },
-                  { x: 390, y: 132, color: "#2eaf67" },
-                  { x: 540, y: 108, color: "#2eaf67" },
-                  { x: 690, y: 92, color: "#2eaf67" },
-                  { x: 90, y: 152, color: "#ef476f" },
-                  { x: 240, y: 150, color: "#ef476f" },
-                  { x: 390, y: 165, color: "#ef476f" },
-                  { x: 540, y: 160, color: "#ef476f" },
-                  { x: 690, y: 164, color: "#ef476f" },
-                ].map((point, index) => (
-                  <circle key={index} cx={point.x} cy={point.y} r="4" fill={point.color} />
-                ))}
-
-                {chartLabels.map((label, index) => (
-                  <text
-                    key={label}
-                    x={90 + index * 150}
-                    y="210"
-                    textAnchor="middle"
-                    fontSize="12"
-                    fill="#6b7695"
-                  >
-                    {label}
-                  </text>
-                ))}
-              </svg>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+        </div>
+      ) : null}
     </>
   );
 }

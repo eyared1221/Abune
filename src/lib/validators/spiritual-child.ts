@@ -162,9 +162,7 @@ export const spiritualChildSubmissionSchema = z
     phoneNumber,
     address: requiredText("Address", 2_000),
     occupation: requiredText("Occupation", 180),
-    educationalLevel: z
-      .union([z.enum(educationalLevelValues), z.literal("")])
-      .default(""),
+    educationalLevel: z.enum(educationalLevelValues),
 
     spiritualEducation: z
       .array(z.enum(spiritualEducationValues))
@@ -178,7 +176,7 @@ export const spiritualChildSubmissionSchema = z
       .array(z.enum(abinetDisciplineValues))
       .transform((values) => [...new Set(values)]),
 
-    previousSpiritualFather: optionalText(200),
+    previousSpiritualFather: requiredText("Previous spiritual father", 200),
     reasonForChangingSpiritualFather: optionalText(),
     receivedPreviousFatherBlessing: z.enum(yesNoValues),
     placeOfBaptism: requiredText("Place of baptism", 240),
@@ -188,6 +186,7 @@ export const spiritualChildSubmissionSchema = z
     prayerFrequency: requiredText("Prayer frequency", 1_000),
     prayerBooks: z
       .array(z.enum(prayerBookValues))
+      .min(1, "Select at least one prayer book.")
       .transform((values) => [...new Set(values)]),
     otherPrayerBook: optionalText(240),
     fastingPractice: requiredText("Fasting practice", 4_000),
@@ -208,12 +207,21 @@ export const spiritualChildSubmissionSchema = z
     children: z.array(childRowSchema).max(30),
     spouseSpiritualFather: optionalText(200),
     childrenNamesAndAges: optionalText().optional(),
-    greatestFamilyChallenge: optionalText(),
-    healthStatus: optionalText(),
+    greatestFamilyChallenge: requiredText("Greatest family challenge", 4_000),
+    healthStatus: requiredText("Health status", 4_000),
 
-    bodilyTemptations: optionalText(),
-    spiritualEmotionalStruggles: optionalText(),
-    significantFutureDecisions: optionalText(),
+    bodilyTemptations: requiredText(
+      "Bodily temptations or addictions",
+      4_000,
+    ),
+    spiritualEmotionalStruggles: requiredText(
+      "Spiritual and emotional struggles",
+      4_000,
+    ),
+    significantFutureDecisions: requiredText(
+      "Significant future life decisions",
+      4_000,
+    ),
     additionalInformation: optionalText().optional(),
   })
   .superRefine((submission, context) => {

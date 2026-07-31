@@ -17,6 +17,16 @@ function isValidDate(value: string) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+function isTodayOrFuture(value: string) {
+  const now = new Date();
+  const today = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("-");
+  return value >= today;
+}
+
 export const availabilityRangeSchema = z
   .object({
     startDate: z.string().refine(isValidDate, "Start date is invalid."),
@@ -48,7 +58,10 @@ export const availabilityIdSchema = z.string().uuid("Calendar entry ID is invali
 
 export const availabilitySubmissionSchema = z
   .object({
-    date: z.string().refine(isValidDate, "Date is invalid."),
+    date: z
+      .string()
+      .refine(isValidDate, "Date is invalid.")
+      .refine(isTodayOrFuture, "Past dates cannot be used for availability."),
     startTime: z
       .string()
       .regex(timePattern, "Start time must use HH:mm format.")

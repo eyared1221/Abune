@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "db:list-children": "cross-env DB_USE_DIRECT=true tsx src/scripts/list-spiritual-children.ts",
+    "db:seed:requests": "cross-env DB_USE_DIRECT=true tsx src/scripts/seed-appointment-requests.ts",
     "db:generate": "cross-env DB_USE_DIRECT=true drizzle-kit generate",
     "db:migrate": "cross-env DB_USE_DIRECT=true drizzle-kit migrate",
     "db:studio": "cross-env DB_USE_DIRECT=true drizzle-kit studio",

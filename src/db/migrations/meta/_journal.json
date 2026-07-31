@@ -64,6 +64,20 @@
       "when": 1785240907636,
       "tag": "0008_warm_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1785337457539,
+      "tag": "0009_melodic_princess_powerful",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785366762308,
+      "tag": "0010_petite_bloodaxe",
+      "breakpoints": true
     }
   ]
 }

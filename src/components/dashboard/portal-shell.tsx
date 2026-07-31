@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { useState, type ReactNode } from "react";
 import {
   Bell,
@@ -10,6 +11,8 @@ import {
   CalendarHeart,
   FileBadge,
   Home,
+  LoaderCircle,
+  LogOut,
   Menu,
   MessageSquare,
   Search,
@@ -19,7 +22,9 @@ import {
 } from "lucide-react";
 
 import { LanguageToggle } from "@/components/layouts/language-toggle";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import type { AppLocale } from "@/i18n/routing";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -121,7 +126,12 @@ export function PortalShell({
   heroVariant = "default",
 }: PortalShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
+  const router = useRouter();
+  const locale = useLocale() as AppLocale;
   const pathname = usePathname();
   const activePath = currentPath ?? pathname;
 
@@ -142,6 +152,43 @@ export function PortalShell({
     heroAccent && description.includes(heroAccent)
       ? description.split(heroAccent)
       : null;
+
+  async function handleLogout() {
+    setIsLoggingOut(true);
+    setLogoutError("");
+
+    try {
+      const result = await authClient.signOut();
+
+      if (result.error) {
+        throw new Error(result.error.message || "Logout failed.");
+      }
+
+      setLogoutDialogOpen(false);
+      router.replace("/login", { locale });
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setLogoutError("Unable to log out. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
+
+  function openLogoutDialog() {
+    setMobileMenuOpen(false);
+    setLogoutError("");
+    setLogoutDialogOpen(true);
+  }
+
+  function closeLogoutDialog() {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setLogoutDialogOpen(false);
+    setLogoutError("");
+  }
 
   const renderNavigation = (items: NavItem[]) =>
     items.map(
@@ -325,6 +372,23 @@ export function PortalShell({
 
                 <nav className="mt-3 space-y-1.5">
                   {renderNavigation(utilityNavigation)}
+
+                  <button
+                    type="button"
+                    onClick={openLogoutDialog}
+                    className="group mx-1 flex min-h-[58px] w-[calc(100%_-_0.5rem)] items-center gap-3 rounded-[20px] border border-transparent px-3 py-2 text-left transition-all duration-200 hover:border-[#f0d6cf] hover:bg-[#fff4f1]"
+                  >
+                    <span className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[14px] bg-[#f7e6e1] text-[#b95a48] transition-all duration-200 group-hover:bg-white">
+                      <LogOut
+                        className="h-[20px] w-[20px]"
+                        strokeWidth={1.9}
+                      />
+                    </span>
+
+                    <span className="min-w-0 flex-1 truncate text-[15px] font-bold text-[#9f4437]">
+                      Logout
+                    </span>
+                  </button>
                 </nav>
               </div>
             </div>
@@ -386,6 +450,80 @@ export function PortalShell({
           </div>
         </section>
       </div>
+
+      {logoutDialogOpen ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center px-4"
+          role="presentation"
+        >
+          <button
+            type="button"
+            aria-label="Close logout confirmation"
+            className="absolute inset-0 bg-[#17233d]/45 backdrop-blur-[2px]"
+            disabled={isLoggingOut}
+            onClick={closeLogoutDialog}
+          />
+
+          <section
+            aria-describedby="logout-dialog-description"
+            aria-labelledby="logout-dialog-title"
+            aria-modal="true"
+            className="relative z-10 w-full max-w-[430px] rounded-[26px] border border-[#eadcc3] bg-[#fffdf8] p-6 shadow-[0_24px_80px_rgba(23,35,61,0.25)] sm:p-8"
+            role="dialog"
+          >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#efd8d1] bg-[#fff3ef] text-[#b95543]">
+              <LogOut className="h-7 w-7" strokeWidth={1.9} />
+            </div>
+
+            <h2
+              id="logout-dialog-title"
+              className="mt-5 text-center font-serif text-[27px] font-bold text-[#18335f]"
+            >
+              Do you want to logout?
+            </h2>
+
+            <p
+              id="logout-dialog-description"
+              className="mx-auto mt-2 max-w-[330px] text-center text-sm font-medium leading-6 text-[#74809a]"
+            >
+              You will need to sign in again to access the Spiritual Father
+              portal.
+            </p>
+
+            {logoutError ? (
+              <div
+                className="mt-5 rounded-[12px] border border-[#e9c7bd] bg-[#fff7f3] px-4 py-3 text-center text-sm font-semibold text-[#b75a45]"
+                role="alert"
+              >
+                {logoutError}
+              </div>
+            ) : null}
+
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                disabled={isLoggingOut}
+                onClick={closeLogoutDialog}
+                className="flex h-12 items-center justify-center rounded-[13px] border border-[#dfd4c1] bg-white text-sm font-bold text-[#53617c] transition-colors hover:bg-[#faf6ef] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                No
+              </button>
+
+              <button
+                type="button"
+                disabled={isLoggingOut}
+                onClick={() => void handleLogout()}
+                className="flex h-12 items-center justify-center gap-2 rounded-[13px] bg-[#b95543] text-sm font-bold text-white shadow-[0_8px_18px_rgba(185,85,67,0.24)] transition-all hover:bg-[#a74636] disabled:cursor-not-allowed disabled:opacity-65"
+              >
+                {isLoggingOut ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : null}
+                {isLoggingOut ? "Logging out..." : "Yes"}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }

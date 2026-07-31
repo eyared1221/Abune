@@ -138,6 +138,22 @@ function calculateAge(dateOfBirth: string) {
   return age;
 }
 
+function getAgeGroup(age: number) {
+  if (age < 18) {
+    return { label: "Under 18", variant: "success" as const };
+  }
+
+  if (age < 40) {
+    return { label: "Young Adults", variant: "violet" as const };
+  }
+
+  if (age < 65) {
+    return { label: "Middle-Aged", variant: "neutral" as const };
+  }
+
+  return { label: "Older Adults", variant: "warning" as const };
+}
+
 function formatJoinedDate(
   dateValue: string | undefined,
   locale: string,
@@ -187,7 +203,7 @@ function buildSpiritualChild(
   t?: (key: string) => string,
 ): FilterableSpiritualChild {
   const age = calculateAge(submission.dateOfBirth);
-  const isTeen = age > 0 && age < 20;
+  const ageGroup = getAgeGroup(age);
   const formattedName = submission.baptismalName.trim();
   const nextAppointmentTitle = submission.children.length
     ? (t?.("appointments.familyGuidance") || "Family Guidance Session")
@@ -212,8 +228,8 @@ return {
   spouseName: submission.spouseName,
   spiritualChildJoinedDate: submission.spiritualChildJoinedDate ?? "",
 
-  group: isTeen ? "Teens" : "Young Adults",
-  groupVariant: isTeen ? "success" : "violet",
+  group: ageGroup.label,
+  groupVariant: ageGroup.variant,
 
   // Use the actual joined date instead of today's date
   joinedOn: formatJoinedDate(
@@ -595,10 +611,10 @@ export function SpiritualChildrenView() {
   ];
 
   const groupFilterOptions: Array<[string, string]> = [
-    ["Teens", t("options.group.teens")],
+    ["Under 18", t("options.group.under18")],
     ["Young Adults", t("options.group.youngAdults")],
-    ["Adults", t("options.group.adults")],
-    ["Families", t("options.group.families")],
+    ["Middle-Aged", t("options.group.middleAged")],
+    ["Older Adults", t("options.group.olderAdults")],
   ];
 
   const statusFilterOptions: Array<[string, string]> = [
@@ -747,9 +763,7 @@ export function SpiritualChildrenView() {
     new Set(registeredChildren.map((child) => child.status)),
   ).sort((left, right) => left.localeCompare(right));
 
-  const groupOptions = Array.from(
-    new Set(registeredChildren.map((child) => child.group)),
-  ).sort((left, right) => left.localeCompare(right));
+  const groupOptions = groupFilterOptions.map(([value]) => value);
 
 const filteredChildren = registeredChildren.filter((originalChild) => {
   const child = originalChild as FilterableSpiritualChild;
@@ -1501,8 +1515,9 @@ const stats = [
 
             <div className="hidden overflow-x-auto md:block">
               <div className="min-w-[980px]">
-                <div className="grid grid-cols-[2fr_1.3fr_1.15fr_1.2fr_1fr_100px] items-center gap-4 border-b border-[#eee9df] bg-[#faf8f3] px-7 py-4 text-[13px] font-extrabold uppercase tracking-[0.06em] text-[#7b8499]">
+                <div className="grid grid-cols-7 items-center gap-4 border-b border-[#eee9df] bg-[#faf8f3] px-7 py-4 text-[13px] font-extrabold uppercase tracking-[0.06em] text-[#7b8499]">
                   <p>{t("table.name")}</p>
+                  <p>{t("table.ageLabel")}</p>
                   <p>{t("table.contact")}</p>
                   <p>{t("table.group")}</p>
                   <p>{t("table.joinedOn")}</p>
@@ -1529,28 +1544,19 @@ const stats = [
                     {paginatedChildren.map((child) => (
                       <div
                         key={child.slug}
-                        className="group grid grid-cols-[2fr_1.3fr_1.15fr_1.2fr_1fr_100px] items-center gap-4 px-7 py-4 transition-all duration-200 hover:bg-[#fcfaf6]"
+                        className="group grid grid-cols-7 items-center gap-4 px-7 py-4 transition-all duration-200 hover:bg-[#fcfaf6]"
                       >
                         <div className="flex min-w-0 items-center gap-4">
-                          <div
-                            className={cn(
-                              "flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] text-sm font-extrabold shadow-sm transition-transform duration-200 group-hover:scale-105",
-                              child.avatarClassName,
-                            )}
-                          >
-                            {child.initials}
-                          </div>
-
                           <div className="min-w-0">
-                            <p className="truncate text-[15px] font-extrabold text-[#1d2859]">
+                            <p className="truncate text-[15px] font-normal text-[#1d2859]">
                               {child.name}
-                            </p>
-
-                            <p className="mt-1 text-sm font-medium text-[#8a93a7]">
-                              {t("table.age", { age: child.age })}
                             </p>
                           </div>
                         </div>
+
+                        <p className="text-sm font-semibold text-[#56617d]">
+                          {child.age}
+                        </p>
 
                         <p className="text-sm font-semibold text-[#56617d]">
                           {child.contact}
@@ -1624,17 +1630,8 @@ const stats = [
                     className="rounded-[20px] border border-[#eee8dc] bg-[#fcfaf6] p-4 shadow-[0_5px_14px_rgba(25,38,70,0.04)]"
                   >
                     <div className="flex items-start gap-3">
-                      <div
-                        className={cn(
-                          "flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] text-sm font-extrabold",
-                          child.avatarClassName,
-                        )}
-                      >
-                        {child.initials}
-                      </div>
-
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-extrabold text-[#1d2859]">
+                        <p className="truncate font-normal text-[#1d2859]">
                           {child.name}
                         </p>
 

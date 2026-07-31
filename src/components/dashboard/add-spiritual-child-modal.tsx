@@ -522,12 +522,13 @@ export function AddSpiritualChildModal({
                     </div>
 
                     <div>
-                      <FieldLabel label={t("fields.educationalLevel")} />
+                      <FieldLabel label={t("fields.educationalLevel")} required />
                       <select
                         className={selectClassName}
                         onChange={(event) =>
                           setEducationalLevel(event.target.value)
                         }
+                        required
                         value={educationalLevel}
                       >
                         <option value="">
@@ -643,7 +644,7 @@ export function AddSpiritualChildModal({
   <div className="mt-6 mb-8 grid gap-5 lg:grid-cols-2">
     {/* Previous Spiritual Father */}
     <div>
-      <FieldLabel label={t("fields.previousSpiritualFather")} />
+      <FieldLabel label={t("fields.previousSpiritualFather")} required />
 
       <input
         className={fieldClassName}
@@ -651,6 +652,7 @@ export function AddSpiritualChildModal({
           setPreviousSpiritualFather(event.target.value)
         }
         placeholder={t("placeholders.previousSpiritualFather")}
+        required
         value={previousSpiritualFather}
       />
     </div>
@@ -807,9 +809,9 @@ export function AddSpiritualChildModal({
 
     {/* Prayer Books */}
     <div>
-      <FieldLabel label={t("fields.prayerBooks")} />
+      <FieldLabel label={t("fields.prayerBooks")} required />
 
-      <div className="space-y-3">
+      <div aria-required="true" className="space-y-3">
         {prayerBookOptions.map((option) => (
           <div
             className="flex flex-col gap-3 sm:flex-row sm:items-center"
@@ -1032,25 +1034,20 @@ export function AddSpiritualChildModal({
     </div>
 
     {/* Children Names and Ages */}
-                    <div>
-                      <FieldLabel label={t("fields.childrenList")} />
+                  <div className="overflow-hidden rounded-[20px] border border-[#e8e0d2] bg-white lg:col-span-2">
+                    <div className="flex items-center justify-between gap-4 border-b border-[#efe7db] px-5 py-4">
+                      <p className="text-[17px] font-bold text-[#1f2b52]">
+                        {t("sections.children")}
+                      </p>
                       <Button
-                        className="h-[54px] w-full rounded-[16px] border border-[#dfd6c4] bg-white text-[15px] font-bold text-[#324061] shadow-none hover:bg-[#faf6ee]"
+                        className="h-10 shrink-0 rounded-[12px] bg-[#c39a37] px-4 text-[14px] font-bold text-white shadow-[0_8px_18px_rgba(195,154,55,0.24)] hover:bg-[#af892f]"
                         onClick={addChildRow}
                         type="button"
                         variant="outline"
                       >
-                        <Plus className="h-5 w-5 text-[#2f3d5d]" />
+                        <Plus className="h-4 w-4 text-[#2f3d5d]" />
                         {t("buttons.addChild")}
                       </Button>
-                    </div>
-
-
-                  <div className="mt-6 overflow-hidden rounded-[20px] border border-[#e8e0d2] bg-white">
-                    <div className="border-b border-[#efe7db] px-5 py-4">
-                      <p className="text-[17px] font-bold text-[#1f2b52]">
-                        {t("sections.children")}
-                      </p>
                     </div>
 
                     <div className="hidden grid-cols-[80px_1.5fr_1fr_1.2fr_100px] items-center gap-4 border-b border-[#efe7db] bg-[#fbf8f2] px-5 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#7d879d] md:grid">
@@ -1160,7 +1157,7 @@ export function AddSpiritualChildModal({
 
     {/* Family Challenge */}
     <div>
-      <FieldLabel label={t("fields.greatestFamilyChallenge")} />
+      <FieldLabel label={t("fields.greatestFamilyChallenge")} required />
 
       <textarea
         className={cn(
@@ -1171,13 +1168,14 @@ export function AddSpiritualChildModal({
           setGreatestFamilyChallenge(event.target.value)
         }
         placeholder={t("placeholders.greatestFamilyChallenge")}
+        required
         value={greatestFamilyChallenge}
       />
     </div>
 
     {/* Health Status */}
     <div>
-      <FieldLabel label={t("fields.healthStatus")} />
+      <FieldLabel label={t("fields.healthStatus")} required />
 
       <textarea
         className={cn(
@@ -1186,6 +1184,7 @@ export function AddSpiritualChildModal({
         )}
         onChange={(event) => setHealthStatus(event.target.value)}
         placeholder={t("placeholders.healthStatus")}
+        required
         value={healthStatus}
       />
     </div>
@@ -1202,7 +1201,7 @@ export function AddSpiritualChildModal({
   <div className="mt-6 mb-6 grid gap-5 lg:grid-cols-3">
     {/* Bodily Temptations / Addictions */}
     <div>
-      <FieldLabel label={t("fields.bodilyTemptations")} />
+      <FieldLabel label={t("fields.bodilyTemptations")} required />
 
       <textarea
         className={cn(
@@ -1211,13 +1210,14 @@ export function AddSpiritualChildModal({
         )}
         onChange={(event) => setBodilyTemptations(event.target.value)}
         placeholder={t("placeholders.bodilyTemptations")}
+        required
         value={bodilyTemptations}
       />
     </div>
 
     {/* Spiritual & Emotional Struggles */}
     <div>
-      <FieldLabel label={t("fields.spiritualEmotionalStruggles")} />
+      <FieldLabel label={t("fields.spiritualEmotionalStruggles")} required />
 
       <textarea
         className={cn(
@@ -1228,13 +1228,14 @@ export function AddSpiritualChildModal({
           setSpiritualEmotionalStruggles(event.target.value)
         }
         placeholder={t("placeholders.spiritualEmotionalStruggles")}
+        required
         value={spiritualEmotionalStruggles}
       />
     </div>
 
     {/* Significant Future Life Decisions */}
     <div>
-      <FieldLabel label={t("fields.significantFutureDecisions")} />
+      <FieldLabel label={t("fields.significantFutureDecisions")} required />
 
       <textarea
         className={cn(
@@ -1245,6 +1246,7 @@ export function AddSpiritualChildModal({
           setSignificantFutureDecisions(event.target.value)
         }
         placeholder={t("placeholders.significantFutureDecisions")}
+        required
         value={significantFutureDecisions}
       />
     </div>

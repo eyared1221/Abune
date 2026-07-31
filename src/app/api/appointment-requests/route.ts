@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiSession } from "@/lib/api-session";
-import { getFatherAppointments } from "@/server/services/appointment.service";
+import { getFatherAppointmentRequests } from "@/server/services/appointment-request.service";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,9 @@ export async function GET() {
   }
 
   try {
-    const result = await getFatherAppointments(session.user.id);
+    const result = await getFatherAppointmentRequests(
+      session.user.id,
+    );
 
     return NextResponse.json(result, {
       headers: {
@@ -31,10 +33,13 @@ export async function GET() {
       },
     });
   } catch (error: unknown) {
-    console.error("Unable to load appointments.", error);
+    console.error(
+      "Unable to load appointment requests.",
+      error,
+    );
 
     return NextResponse.json(
-      { error: "Unable to load appointments." },
+      { error: "Unable to load appointment requests." },
       { status: 500 },
     );
   }

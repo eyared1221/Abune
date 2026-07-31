@@ -261,10 +261,10 @@
         "WIDOWED": "Widowed"
       },
       "group": {
-        "teens": "Teens",
+        "under18": "Under 18",
         "youngAdults": "Young Adults",
-        "adults": "Adults",
-        "families": "Families"
+        "middleAged": "Middle-Aged",
+        "olderAdults": "Older Adults"
       },
       "status": {
         "active": "Active",
@@ -274,6 +274,7 @@
     },
     "table": {
       "name": "Name",
+      "ageLabel": "Age",
       "contact": "Contact",
       "group": "Group",
       "joinedOn": "Joined On",

@@ -7,3 +7,4 @@ export * from "./spiritual-events";
 export * from "./availability";
 export * from "./father-invitations";
 export * from "./registration-email-otps";
+export * from "./canons";
