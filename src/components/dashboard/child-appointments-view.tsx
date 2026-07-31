@@ -40,8 +40,8 @@ const appointmentTypes = [
     title: "Confession",
     description: "Sacrament of Reconciliation",
     icon: Plus,
-    color: "text-[#2563eb]",
-    bg: "bg-[#eff4ff]",
+    color: "text-[#b47a13]",
+    bg: "bg-[#fff8e9]",
   },
   {
     id: "spiritual-guidance" as AppointmentReason,
@@ -56,32 +56,32 @@ const appointmentTypes = [
     title: "Counseling",
     description: "Personal or emotional support",
     icon: Plus,
-    color: "text-[#0d9488]",
-    bg: "bg-[#ecfdf5]",
+    color: "text-[#b47a13]",
+    bg: "bg-[#fff8e9]",
   },
   {
     id: "repentance" as AppointmentReason,
     title: "Repentance",
     description: "Seeking spiritual renewal",
     icon: Plus,
-    color: "text-[#dc6843]",
-    bg: "bg-[#fff3ee]",
+    color: "text-[#b47a13]",
+    bg: "bg-[#fff8e9]",
   },
   {
     id: "family-issue" as AppointmentReason,
     title: "Family Issue",
     description: "Family problems and relationships",
     icon: Plus,
-    color: "text-[#dc6843]",
-    bg: "bg-[#fff3ee]",
+    color: "text-[#b47a13]",
+    bg: "bg-[#fff8e9]",
   },
   {
     id: "other" as AppointmentReason,
     title: "Other",
     description: "Other reason not listed above",
     icon: Plus,
-    color: "text-[#7c3aed]",
-    bg: "bg-[#f3f0ff]",
+    color: "text-[#b47a13]",
+    bg: "bg-[#fff8e9]",
   },
 ] as const;
 
@@ -513,9 +513,10 @@ export function ChildAppointmentsView() {
             type="button"
             disabled={!selectedDate}
             onClick={() => selectedDate && setStep("select-time")}
-            className="mt-5 flex w-full items-center justify-center rounded-[18px] bg-[#b9903e] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(128,79,8,0.24)] transition-colors hover:bg-[#a98437] disabled:opacity-70 disabled:hover:bg-[#b9903e] sm:py-5 sm:text-lg"
+            className="mt-5 flex w-full items-center justify-center gap-4 rounded-[18px] bg-[#b9903e] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(128,79,8,0.24)] transition-colors hover:bg-[#a98437] disabled:opacity-70 disabled:hover:bg-[#b9903e] sm:py-5 sm:text-lg"
           >
-            Select a Date
+            <CalendarCheck className="h-5 w-5" />
+            {selectedDate ? `See Available Times — ${shortDate(selectedDate)}` : "Select a Date"}
           </button>
         </div>
 
@@ -659,7 +660,7 @@ export function ChildAppointmentsView() {
               type="button"
               disabled={!selectedSlot || submitting}
               onClick={() => selectedSlot && void handleConfirmSlot()}
-              className={`mt-5 flex w-full items-center justify-center gap-2 rounded-[18px] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(23,52,97,.18)] transition-colors ${selectedSlot ? "bg-[#173461] hover:bg-[#102b55]" : "bg-[#c9b28d]"}`}
+              className={`mt-5 flex w-full items-center justify-center gap-2 rounded-[18px] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(185,144,62,.22)] transition-colors ${selectedSlot ? "bg-[#b9903e] hover:bg-[#a98437]" : "bg-[#c9b28d]"}`}
             >
               <CalendarPlus className="h-5 w-5" />
               {submitting ? "Sending request..." : selectedSlot ? `Confirm — ${displayTime(selectedSlot.startTime)}` : "Select a Time Slot"}
@@ -727,7 +728,7 @@ export function ChildAppointmentsView() {
           <button
             type="button"
             onClick={handleBackToAppointments}
-            className="mt-6 flex w-full items-center justify-center gap-3 rounded-[18px] bg-[#173461] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(16,39,94,0.24)] transition-transform hover:-translate-y-0.5 sm:py-5 sm:text-lg"
+            className="mt-6 flex w-full items-center justify-center gap-3 rounded-[18px] bg-[#b9903e] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(185,144,62,.22)] transition-transform hover:-translate-y-0.5 hover:bg-[#a98437] sm:py-5 sm:text-lg"
           >
             Back to Appointments
           </button>
@@ -755,13 +756,13 @@ export function ChildAppointmentsView() {
         <header className="hidden items-center justify-between border-b border-[#eadfca] pb-6 xl:flex"><div><p className="text-xs font-black uppercase tracking-[.16em] text-[#c99d40]">Spiritual child portal</p><h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#173461]">Appointments</h1></div><div className="relative"><Bell className="h-7 w-7 text-[#243453]" /><span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full border border-white bg-[#aa1f27]" /></div></header>
 
         {/* Tab Navigation */}
-        <div className="mt-7 flex gap-8 border-b border-[#e8c77e] sm:gap-10">
-          {(["request", "my-requests", "history"] as const).map((tab) => (
+        <div className="mt-7 grid grid-cols-2 border-b border-[#e8c77e]">
+          {(["request", "my-requests"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`border-b-2 pb-3 text-sm transition-colors min-[480px]:text-base ${
+              className={`border-b-2 pb-3 text-center text-sm transition-colors min-[480px]:text-base ${
                 activeTab === tab
                   ? "border-[#10275e] font-medium text-[#10275e]"
                   : "border-transparent font-medium text-[#8c96a8] hover:text-[#5c6b8a]"
