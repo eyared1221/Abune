@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import {
   ArrowLeft,
   Bell,
@@ -8,9 +7,12 @@ import {
   CalendarCheck,
   CalendarClock,
   CalendarDays,
+  CalendarPlus,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Cross,
+  Pencil,
   Equal,
   House,
   LoaderCircle,
@@ -18,6 +20,7 @@ import {
   Moon,
   MoreHorizontal,
   Plus,
+  Trash2,
   Sunrise,
   Users,
 } from "lucide-react";
@@ -26,6 +29,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
+import { ChildBottomNav, ChildTopBar } from "@/components/dashboard/child-navigation";
 import type { AppointmentReason, MeetingMethod } from "@/types/availability";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -43,7 +47,7 @@ const appointmentTypes = [
     id: "spiritual-guidance" as AppointmentReason,
     title: "Spiritual Guidance",
     description: "Spiritual advice and teaching",
-    icon: Sunrise,
+    icon: Plus,
     color: "text-[#b47a13]",
     bg: "bg-[#fff8e9]",
   },
@@ -51,7 +55,7 @@ const appointmentTypes = [
     id: "counseling" as AppointmentReason,
     title: "Counseling",
     description: "Personal or emotional support",
-    icon: Equal,
+    icon: Plus,
     color: "text-[#0d9488]",
     bg: "bg-[#ecfdf5]",
   },
@@ -59,7 +63,7 @@ const appointmentTypes = [
     id: "repentance" as AppointmentReason,
     title: "Repentance",
     description: "Seeking spiritual renewal",
-    icon: Moon,
+    icon: Plus,
     color: "text-[#dc6843]",
     bg: "bg-[#fff3ee]",
   },
@@ -67,7 +71,7 @@ const appointmentTypes = [
     id: "family-issue" as AppointmentReason,
     title: "Family Issue",
     description: "Family problems and relationships",
-    icon: Users,
+    icon: Plus,
     color: "text-[#dc6843]",
     bg: "bg-[#fff3ee]",
   },
@@ -75,7 +79,7 @@ const appointmentTypes = [
     id: "other" as AppointmentReason,
     title: "Other",
     description: "Other reason not listed above",
-    icon: MoreHorizontal,
+    icon: Plus,
     color: "text-[#7c3aed]",
     bg: "bg-[#f3f0ff]",
   },
@@ -87,12 +91,6 @@ const tabLabels: Record<Tab, string> = {
   request: "Request",
   "my-requests": "My Requests",
   history: "History",
-};
-
-const methodLabels: Record<MeetingMethod, string> = {
-  "in-person": "Direct meeting",
-  phone: "Phone call",
-  online: "Online meeting",
 };
 
 const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
@@ -174,6 +172,10 @@ function displayTime(time: string) {
   return `${hour12}:${m} ${suffix}`;
 }
 
+function sessionLabel(time: string) {
+  return Number(time.split(":")[0]) < 12 ? "Morning session" : "Afternoon session";
+}
+
 function durationMinutes(start: string, end: string) {
   const [sh = "0", sm = "0"] = start.split(":").map(Number);
   const [eh = "0", em = "0"] = end.split(":").map(Number);
@@ -201,6 +203,7 @@ export function ChildAppointmentsView() {
   const [requests, setRequests] = useState<AppointmentRequest[]>([]);
   const [history, setHistory] = useState<Appointment[]>([]);
   const [error, setError] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<AppointmentRequest | null>(null);
 
   // Date picker state
   const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
@@ -309,14 +312,13 @@ export function ChildAppointmentsView() {
     return slots.filter((s) => s.date === selectedDate);
   }, [slots, selectedDate]);
 
-  // Nearby dates with slots (for the day tabs in time picker)
+  // Every remaining scheduled date, from the selected day through the last
+  // availability entry, for the time-picker date tabs.
   const nearbyDates = useMemo(() => {
     if (!selectedDate) return [];
     const allDates = [...datesWithSlots].sort();
     const idx = allDates.indexOf(selectedDate);
-    const start = Math.max(0, idx - 1);
-    const end = Math.min(allDates.length, idx + 3);
-    return allDates.slice(start, end);
+    return idx >= 0 ? allDates.slice(idx) : allDates;
   }, [selectedDate, datesWithSlots]);
 
   // ─── Actions ─────────────────────────────────────────────────────────────
@@ -328,12 +330,16 @@ export function ChildAppointmentsView() {
 
   const handleDateSelected = (dateStr: string) => {
     setSelectedDate(dateStr);
-    setStep("select-time");
   };
 
-  const handleSelectSlot = async (slot: Slot) => {
-    if (!selectedType) return;
+  const handleSelectSlot = (slot: Slot) => {
     setSelectedSlot(slot);
+  };
+
+  const handleConfirmSlot = async () => {
+    if (!selectedType || !selectedSlot) return;
+    const slot = selectedSlot;
+
     setSubmitting(true);
     setError("");
 
@@ -360,7 +366,7 @@ export function ChildAppointmentsView() {
           date: slot.date,
           startTime: slot.startTime,
           endTime: slot.endTime,
-          fatherName,
+          fatherName: slots.length ? fatherName : "Abba Yohannes",
         });
         setStep("confirmed");
       } else {
@@ -386,6 +392,13 @@ export function ChildAppointmentsView() {
     setActiveTab("my-requests");
   };
 
+  const removeRequest = async (request: AppointmentRequest, edit = false) => {
+    const response = await fetch(`/api/appointments/request/${request.id}`, { method: "DELETE" });
+    if (!response.ok) { const data = await response.json(); setError(data.error || "Unable to remove request"); return; }
+    setRequests((current) => current.filter((item) => item.id !== request.id));
+    if (edit) { setSelectedType(request.reason); setSelectedDate(request.requestedDate); setActiveTab("request"); setStep("select-date"); }
+  };
+
   // ─── Step: Select Date ───────────────────────────────────────────────────
 
   if (step === "select-date") {
@@ -393,20 +406,10 @@ export function ChildAppointmentsView() {
     const TypeIcon = selectedTypeData?.icon || Calendar;
 
     return (
-      <main className="min-h-screen bg-[#fffaf1] px-3 pb-24 pt-4 text-[#0e265b] min-[480px]:px-5 min-[480px]:pt-7 sm:px-8 sm:pb-28">
+      <main className="min-h-dvh bg-[#fffbf2] px-5 pb-28 pt-7 font-sans text-[#243453] sm:px-8 md:px-10 xl:mx-auto xl:max-w-[1280px] xl:pb-10 xl:pt-9">
         <div className="mx-auto max-w-[920px]">
-          <header className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Go back"
-              onClick={() => setStep("list")}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e8c77e] bg-white text-[#0e265b] shadow-sm transition-colors hover:bg-[#fff8e9] min-[480px]:h-12 min-[480px]:w-12"
-            >
-              <ArrowLeft className="h-5 w-5 min-[480px]:h-6 min-[480px]:w-6" />
-            </button>
-            <h1 className="font-serif text-2xl font-bold text-[#10275e] min-[480px]:text-3xl">
-              Select Date
-            </h1>
+          <ChildTopBar title="Select Date" />
+          <header className="mt-5 flex items-center xl:mt-0">
             <div className="ml-auto flex gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-[#10275e]" />
               <span className="h-2.5 w-2.5 rounded-full bg-[#b47a13]" />
@@ -415,22 +418,22 @@ export function ChildAppointmentsView() {
           </header>
 
           {/* Selected type badge */}
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#d0e8d4] bg-[#f0faf2] px-4 py-3">
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#ead3a4] bg-[#fff8e9] px-4 py-3 sm:px-5">
             <div className={`flex h-9 w-9 items-center justify-center rounded-full ${selectedTypeData?.bg} ${selectedTypeData?.color}`}>
               <TypeIcon className="h-4 w-4" />
             </div>
-            <span className="font-serif font-bold text-[#10275e]">{selectedTypeData?.title}</span>
+            <span className="font-medium text-[#1d2859]">{selectedTypeData?.title}</span>
             <button
               type="button"
               onClick={() => setStep("list")}
-              className="ml-auto text-sm font-semibold text-[#10275e] hover:text-[#b47a13]"
+              className="ml-auto text-sm font-medium text-[#173461] hover:text-[#b47a13]"
             >
               Change
             </button>
           </div>
 
           {/* Calendar */}
-          <div className="mt-5 rounded-[22px] border border-[#ead3a4] bg-[#fffdf8] p-4 shadow-[0_3px_8px_rgba(93,65,24,0.08)] min-[480px]:p-6">
+          <div className="mt-5 rounded-[22px] border border-[#ead3a4] bg-[#fffdf8] p-4 shadow-[0_3px_8px_rgba(93,65,24,0.08)] sm:rounded-[28px] sm:p-6 md:p-8">
             <div className="flex items-center justify-between">
               <button
                 type="button"
@@ -439,7 +442,7 @@ export function ChildAppointmentsView() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <h2 className="font-serif text-lg font-bold text-[#10275e]">{displayMonth(month)}</h2>
+              <h2 className="text-lg font-medium text-[#173461]">{displayMonth(month)}</h2>
               <button
                 type="button"
                 onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
@@ -449,13 +452,13 @@ export function ChildAppointmentsView() {
               </button>
             </div>
 
-            <div className="mt-4 grid grid-cols-7 text-center text-xs font-semibold text-[#5c6b8a]">
+            <div className="mt-5 grid grid-cols-7 text-center text-xs font-medium text-[#5c6b8a]">
               {weekdays.map((wd) => (
                 <div key={wd} className="py-2">{wd}</div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 text-center text-sm">
+            <div className="grid grid-cols-7 text-center text-sm md:text-base">
               {days.map((day, i) => {
                 if (!day) return <div key={`empty-${i}`} />;
                 const dk = dateKey(day);
@@ -470,7 +473,7 @@ export function ChildAppointmentsView() {
                     type="button"
                     disabled={isPast}
                     onClick={() => !isPast && handleDateSelected(dk)}
-                    className={`relative mx-auto my-1 flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                    className={`relative mx-auto my-1 flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors sm:h-11 sm:w-11 md:h-12 md:w-12 ${
                       isSelected
                         ? "bg-[#10275e] text-white"
                         : isToday
@@ -478,7 +481,7 @@ export function ChildAppointmentsView() {
                           : isPast
                             ? "cursor-not-allowed text-[#d4d4d8]"
                             : hasSlots
-                              ? "cursor-pointer font-bold text-[#10275e] hover:bg-[#e8d7b3]"
+                              ? "cursor-pointer text-[#10275e] hover:bg-[#e8d7b3]"
                               : "cursor-pointer text-[#10275e] hover:bg-[#f5f0e5]"
                     }`}
                   >
@@ -508,15 +511,15 @@ export function ChildAppointmentsView() {
           {/* Bottom action */}
           <button
             type="button"
-            disabled
-            className="mt-5 flex w-full items-center justify-center gap-3 rounded-[20px] bg-gradient-to-r from-[#ce9e35] to-[#a96f0d] px-6 py-4 font-serif text-base font-bold text-white opacity-70 shadow-[0_6px_15px_rgba(128,79,8,0.24)] min-[480px]:rounded-[24px] min-[480px]:py-5 min-[480px]:text-lg"
+            disabled={!selectedDate}
+            onClick={() => selectedDate && setStep("select-time")}
+            className="mt-5 flex w-full items-center justify-center rounded-[18px] bg-[#b9903e] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(128,79,8,0.24)] transition-colors hover:bg-[#a98437] disabled:opacity-70 disabled:hover:bg-[#b9903e] sm:py-5 sm:text-lg"
           >
-            <ChevronRight className="h-5 w-5" />
-            Select a Date First
+            Select a Date
           </button>
         </div>
 
-        <BottomNav />
+        <ChildBottomNav active="appointments" />
       </main>
     );
   }
@@ -526,22 +529,16 @@ export function ChildAppointmentsView() {
   if (step === "select-time" && selectedDate) {
     const selectedTypeData = appointmentTypes.find((t) => t.id === selectedType);
     const TypeIcon = selectedTypeData?.icon || Calendar;
+    const visibleSlots = slots;
+    const visibleDates = nearbyDates;
+    const visibleSlotsForDate = visibleSlots.filter((slot) => slot.date === selectedDate);
+    const displayFatherName = fatherName;
 
     return (
-      <main className="min-h-screen bg-[#fffaf1] px-3 pb-24 pt-4 text-[#0e265b] min-[480px]:px-5 min-[480px]:pt-7 sm:px-8 sm:pb-28">
+      <main className="min-h-dvh bg-[#fffbf2] px-5 pb-28 pt-7 font-sans text-[#243453] sm:px-8 md:px-10 xl:mx-auto xl:max-w-[1280px] xl:pb-10 xl:pt-9">
         <div className="mx-auto max-w-[920px]">
-          <header className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Go back"
-              onClick={() => setStep("select-date")}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e8c77e] bg-white text-[#0e265b] shadow-sm transition-colors hover:bg-[#fff8e9] min-[480px]:h-12 min-[480px]:w-12"
-            >
-              <ArrowLeft className="h-5 w-5 min-[480px]:h-6 min-[480px]:w-6" />
-            </button>
-            <h1 className="font-serif text-2xl font-bold text-[#10275e] min-[480px]:text-3xl">
-              Select Time
-            </h1>
+          <ChildTopBar title="Select Time" />
+          <header className="mt-5 flex items-center xl:mt-0">
             <div className="ml-auto flex gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-[#10275e]" />
               <span className="h-2.5 w-2.5 rounded-full bg-[#10275e]" />
@@ -550,18 +547,18 @@ export function ChildAppointmentsView() {
           </header>
 
           {/* Selected type + date badge */}
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#d0e8d4] bg-[#f0faf2] px-4 py-3">
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#ead3a4] bg-[#fff8e9] px-4 py-3 sm:px-5">
             <div className={`flex h-9 w-9 items-center justify-center rounded-full ${selectedTypeData?.bg} ${selectedTypeData?.color}`}>
               <TypeIcon className="h-4 w-4" />
             </div>
             <div>
-              <span className="font-serif font-bold text-[#10275e]">{selectedTypeData?.title}</span>
-              <p className="text-xs text-[#706559]">{displayDateLong(selectedDate)}</p>
+              <span className="font-medium text-[#1d2859]">{selectedTypeData?.title}</span>
+              <p className="text-xs font-medium text-[#6e7891]">{displayDateLong(selectedDate)}</p>
             </div>
             <button
               type="button"
               onClick={() => setStep("select-date")}
-              className="ml-auto text-sm font-semibold text-[#10275e] hover:text-[#b47a13]"
+              className="ml-auto text-sm font-medium text-[#173461] hover:text-[#b47a13]"
             >
               Change date
             </button>
@@ -569,9 +566,9 @@ export function ChildAppointmentsView() {
 
           {/* Day tabs */}
           <div className="mt-5 flex gap-2 overflow-x-auto pb-2">
-            {nearbyDates.map((d) => {
+            {visibleDates.map((d) => {
               const isActive = d === selectedDate;
-              const daySlots = slots.filter((s) => s.date === d);
+              const daySlots = visibleSlots.filter((s) => s.date === d);
               return (
                 <button
                   key={d}
@@ -596,38 +593,40 @@ export function ChildAppointmentsView() {
           {/* Available slots */}
           <div className="mt-4">
             <div className="flex items-center justify-between">
-              <p className="font-serif text-base font-bold text-[#10275e]">
-                {slotsForSelectedDate.length} slots available
+              <p className="text-base font-medium text-[#173461]">
+                {visibleSlotsForDate.length} slots available
               </p>
-              <p className="text-sm text-[#b47a13]">{fatherName}</p>
+              <p className="text-sm text-[#b47a13]">{displayFatherName}</p>
             </div>
 
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <LoaderCircle className="h-8 w-8 animate-spin text-[#b47a13]" />
               </div>
-            ) : slotsForSelectedDate.length === 0 ? (
-              <div className="mt-4 flex min-h-[160px] items-center justify-center rounded-[22px] border border-[#ead3a4] bg-[#fffdf8] p-6 text-center">
-                <p className="text-sm text-[#706559]">No available slots for this date</p>
+            ) : visibleSlotsForDate.length === 0 ? (
+              <div className="mt-8 flex min-h-[190px] flex-col items-center justify-center text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#fff1d6] text-[#b47a13]"><CalendarClock className="h-7 w-7" /></span>
+                <p className="mt-4 text-base font-medium text-[#6e7891]">No available slots for this date</p>
+                <p className="mt-1 text-sm text-[#9aa2b1]">Please choose another scheduled day.</p>
               </div>
             ) : (
-              <div className="mt-4 space-y-4">
-                {slotsForSelectedDate.map((slot) => (
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                {visibleSlotsForDate.map((slot) => (
                   <div
                     key={slot.id}
-                    className="rounded-[22px] border border-[#ead3a4] bg-[#fffdf8] p-5 shadow-[0_3px_8px_rgba(93,65,24,0.08)]"
+                    className={`rounded-[22px] border bg-[#fffdf8] p-5 shadow-[0_3px_8px_rgba(93,65,24,0.08)] transition-colors ${selectedSlot?.id === slot.id ? "border-[3px] border-[#173461]" : "border-[#ead3a4]"}`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-serif text-xl font-bold text-[#10275e]">
+                      <span className="text-xl font-medium text-[#173461]">
                         {displayTime(slot.startTime)}
                       </span>
                       <span className="text-[#b47a13]">+</span>
-                      <span className="font-serif text-xl font-bold text-[#10275e]">
+                      <span className="text-xl font-medium text-[#173461]">
                         {displayTime(slot.endTime)}
                       </span>
                     </div>
                     <div className="mt-2 flex items-center justify-between text-sm text-[#706559]">
-                      <span>{fatherName} · {methodLabels[slot.meetingMethod]}</span>
+                      <span>{sessionLabel(slot.startTime)} · {slot.meetingMethod.replace("-", " ")}</span>
                       <span className="font-semibold text-[#b47a13]">
                         {durationMinutes(slot.startTime, slot.endTime)} min
                       </span>
@@ -636,25 +635,35 @@ export function ChildAppointmentsView() {
                       <p className="mt-1 text-sm text-[#706559]">{slot.notes}</p>
                     )}
                     <div className="mt-3 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-xs text-[#8c96a8]">
-                        <span className="h-2 w-2 rounded-full bg-[#8c96a8]" /> Available
+                      <span className={`flex items-center gap-1.5 text-xs ${selectedSlot?.id === slot.id ? "text-[#159447]" : "text-[#8c96a8]"}`}>
+                        <span className={`h-2 w-2 rounded-full ${selectedSlot?.id === slot.id ? "bg-[#22c55e]" : "bg-[#8c96a8]"}`} /> {selectedSlot?.id === slot.id ? "Selected" : "Available"}
                       </span>
                       <button
                         type="button"
                         disabled={submitting}
                         onClick={() => handleSelectSlot(slot)}
-                        className="flex items-center gap-1 text-sm font-semibold text-[#b47a13] hover:text-[#8d6b22] disabled:opacity-50"
+                        className="flex items-center gap-1 text-sm font-medium text-[#b47a13] hover:text-[#8d6b22] disabled:opacity-50"
                       >
                         {submitting && selectedSlot?.id === slot.id ? (
                           <LoaderCircle className="h-4 w-4 animate-spin" />
                         ) : null}
-                        Select this slot →
+                        {selectedSlot?.id === slot.id ? "Tap confirm →" : "Select →"}
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+
+            <button
+              type="button"
+              disabled={!selectedSlot || submitting}
+              onClick={() => selectedSlot && void handleConfirmSlot()}
+              className={`mt-5 flex w-full items-center justify-center gap-2 rounded-[18px] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(23,52,97,.18)] transition-colors ${selectedSlot ? "bg-[#173461] hover:bg-[#102b55]" : "bg-[#c9b28d]"}`}
+            >
+              <CalendarPlus className="h-5 w-5" />
+              {submitting ? "Sending request..." : selectedSlot ? `Confirm — ${displayTime(selectedSlot.startTime)}` : "Select a Time Slot"}
+            </button>
 
             {error && (
               <div className="mt-4 rounded-xl bg-[#fff0ec] p-3 text-center text-sm text-[#b85445]">
@@ -664,7 +673,7 @@ export function ChildAppointmentsView() {
           </div>
         </div>
 
-        <BottomNav />
+        <ChildBottomNav active="appointments" />
       </main>
     );
   }
@@ -673,29 +682,20 @@ export function ChildAppointmentsView() {
 
   if (step === "confirmed" && confirmedData) {
     return (
-      <main className="min-h-screen bg-[#fffaf1] px-3 pb-24 pt-4 text-[#0e265b] min-[480px]:px-5 min-[480px]:pt-7 sm:px-8 sm:pb-28">
+      <main className="min-h-dvh bg-[#fffbf2] px-5 pb-28 pt-7 font-sans text-[#243453] sm:px-8 md:px-10 xl:mx-auto xl:max-w-[1280px] xl:pb-10 xl:pt-9">
         <div className="mx-auto max-w-[920px]">
-          <header className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Go back"
-              onClick={handleBackToAppointments}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e8c77e] bg-white text-[#0e265b] shadow-sm transition-colors hover:bg-[#fff8e9] min-[480px]:h-12 min-[480px]:w-12"
-            >
-              <ArrowLeft className="h-5 w-5 min-[480px]:h-6 min-[480px]:w-6" />
-            </button>
-            <h1 className="font-serif text-2xl font-bold text-[#10275e] min-[480px]:text-3xl">
-              Confirmed
-            </h1>
-          </header>
+          <ChildTopBar title="Appointments" />
+          <div className="mt-7 text-center">
+            <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#dcfce7] text-[#16a34a]"><CheckCircle2 className="h-11 w-11" /></span>
+            <h1 className="mt-5 text-2xl font-semibold text-[#173461]">Request Submitted!</h1>
+          </div>
 
-          <p className="mt-6 text-center text-sm leading-relaxed text-[#5c6b8a] min-[480px]:text-base">
-            Your <span className="font-bold text-[#10275e]">{confirmedData.reason}</span> appointment
+          <p className="mt-4 text-center text-sm leading-relaxed text-[#5c6b8a] sm:text-base">
+            Your <span className="font-semibold text-[#10275e]">{confirmedData.reason}</span> appointment
             request for{" "}
-            <span className="font-bold text-[#b47a13]">
+            <span className="font-semibold text-[#b47a13]">
               {displayDateLong(confirmedData.date)} at {displayTime(confirmedData.startTime)}
-            </span>{" "}
-            has been sent to <span className="font-bold text-[#10275e]">{confirmedData.fatherName}</span>.
+            </span>{" "}has been sent to <span className="font-semibold text-[#10275e]">{confirmedData.fatherName}</span>.
           </p>
 
           {/* Details table */}
@@ -716,10 +716,10 @@ export function ChildAppointmentsView() {
           </div>
 
           {/* Reminder */}
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#f0dab0] bg-[#fff8e9] px-4 py-3">
-            <Bell className="h-5 w-5 shrink-0 text-[#b47a13]" />
-            <p className="text-sm text-[#706559]">
-              You will receive a reminder <span className="font-bold text-[#b47a13]">1 day before</span> your appointment.
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#bfdbfe] bg-[#eff6ff] px-4 py-3">
+            <Bell className="h-5 w-5 shrink-0 text-[#2563eb]" />
+            <p className="text-sm text-[#1d4ed8]">
+              You will receive a reminder <span className="font-semibold">1 day before</span> your appointment.
             </p>
           </div>
 
@@ -727,7 +727,7 @@ export function ChildAppointmentsView() {
           <button
             type="button"
             onClick={handleBackToAppointments}
-            className="mt-6 flex w-full items-center justify-center gap-3 rounded-[20px] bg-[#10275e] px-6 py-4 font-serif text-base font-bold text-white shadow-[0_6px_15px_rgba(16,39,94,0.24)] transition-transform hover:-translate-y-0.5 min-[480px]:rounded-[24px] min-[480px]:py-5 min-[480px]:text-lg"
+            className="mt-6 flex w-full items-center justify-center gap-3 rounded-[18px] bg-[#173461] px-6 py-4 text-base font-medium text-white shadow-[0_6px_15px_rgba(16,39,94,0.24)] transition-transform hover:-translate-y-0.5 sm:py-5 sm:text-lg"
           >
             Back to Appointments
           </button>
@@ -735,13 +735,13 @@ export function ChildAppointmentsView() {
           <button
             type="button"
             onClick={handleViewMyRequests}
-            className="mt-3 flex w-full items-center justify-center gap-1 text-sm font-semibold text-[#10275e] hover:text-[#b47a13]"
+            className="mt-3 flex w-full items-center justify-center gap-1 text-sm font-medium text-[#b47a13] hover:text-[#8d6b22]"
           >
             View My Requests →
           </button>
         </div>
 
-        <BottomNav />
+        <ChildBottomNav active="appointments" />
       </main>
     );
   }
@@ -749,34 +749,22 @@ export function ChildAppointmentsView() {
   // ─── Step: List (default) ────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-[#fffaf1] px-3 pb-24 pt-4 text-[#0e265b] min-[480px]:px-5 min-[480px]:pt-7 sm:px-8 sm:pb-28">
-      <div className="mx-auto max-w-[920px]">
-        {/* Back Header */}
-        <header className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Go back"
-            onClick={() => router.push("/child", { locale })}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e8c77e] bg-white text-[#0e265b] shadow-sm transition-colors hover:bg-[#fff8e9] min-[480px]:h-12 min-[480px]:w-12"
-          >
-            <ArrowLeft className="h-5 w-5 min-[480px]:h-6 min-[480px]:w-6" />
-          </button>
-          <h1 className="font-serif text-2xl font-bold text-[#10275e] min-[480px]:text-3xl">
-            Appointments
-          </h1>
-        </header>
+    <main className="min-h-dvh bg-[#fffbf2] px-5 pb-28 pt-7 font-sans text-[#243453] sm:px-8 md:px-10 xl:mx-auto xl:max-w-[1280px] xl:pb-10 xl:pt-9">
+      <div className="mx-auto max-w-[1120px]">
+        <ChildTopBar title="Appointments" />
+        <header className="hidden items-center justify-between border-b border-[#eadfca] pb-6 xl:flex"><div><p className="text-xs font-black uppercase tracking-[.16em] text-[#c99d40]">Spiritual child portal</p><h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#173461]">Appointments</h1></div><div className="relative"><Bell className="h-7 w-7 text-[#243453]" /><span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full border border-white bg-[#aa1f27]" /></div></header>
 
         {/* Tab Navigation */}
-        <div className="mt-5 flex gap-6 border-b border-[#e8c77e]">
+        <div className="mt-7 flex gap-8 border-b border-[#e8c77e] sm:gap-10">
           {(["request", "my-requests", "history"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`border-b-2 pb-2.5 text-sm font-semibold transition-colors min-[480px]:text-base ${
+              className={`border-b-2 pb-3 text-sm transition-colors min-[480px]:text-base ${
                 activeTab === tab
-                  ? "border-[#10275e] text-[#10275e]"
-                  : "border-transparent text-[#8c96a8] hover:text-[#5c6b8a]"
+                  ? "border-[#10275e] font-medium text-[#10275e]"
+                  : "border-transparent font-medium text-[#8c96a8] hover:text-[#5c6b8a]"
               }`}
             >
               {tabLabels[tab]}
@@ -786,16 +774,12 @@ export function ChildAppointmentsView() {
 
         {/* Request Tab Content */}
         {activeTab === "request" && (
-          <div className="mt-5 space-y-5">
-            <div className="rounded-[22px] border border-[#ead3a4] bg-[#fffdf8] p-5 shadow-[0_3px_8px_rgba(93,65,24,0.08)] min-[480px]:rounded-[28px] min-[480px]:p-6">
-              <h2 className="font-serif text-xl font-bold text-[#10275e] min-[480px]:text-2xl">
-                Request New Appointment
-              </h2>
-              <p className="mt-1 text-sm text-[#706559]">
-                Choose the type of appointment you need
-              </p>
+          <div className="mt-6 space-y-5">
+            <div className="rounded-[24px] border border-[#eadfca] bg-[#fffdf8] p-5 shadow-[0_8px_24px_rgba(42,48,59,.08)] sm:p-7">
+              <h2 className="text-2xl font-medium tracking-tight text-[#173461] sm:text-3xl">What would you like to discuss?</h2>
+              <p className="mt-2 text-sm font-medium text-[#6e7891] sm:text-base">Select one reason and we’ll show the available times with your spiritual father.</p>
 
-              <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-4">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {appointmentTypes.map((type) => {
                   const Icon = type.icon;
                   const isSelected = selectedType === type.id;
@@ -805,35 +789,34 @@ export function ChildAppointmentsView() {
                       key={type.id}
                       type="button"
                       onClick={() => setSelectedType(type.id)}
-                      className={`flex items-start gap-3 rounded-xl border-l-4 p-3 text-left transition-all min-[480px]:p-4 ${
+                      className={`group flex items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
                         isSelected
-                          ? "border-l-[#3b963e] bg-[#f0faf2]"
-                          : "border-l-transparent hover:bg-[#fdfaf3]"
+                          ? "border-[#c99d40] bg-[#fff8e9] shadow-[0_7px_18px_rgba(201,157,64,.14)]"
+                          : "border-[#eee6d8] bg-white hover:-translate-y-0.5 hover:border-[#dfc488] hover:shadow-[0_7px_18px_rgba(42,48,59,.08)]"
                       }`}
                     >
                       <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${type.bg} ${type.color}`}
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] ${type.bg} ${type.color}`}
                       >
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-serif text-sm font-bold leading-tight text-[#10275e] min-[480px]:text-base">
+                        <p className="text-base font-bold leading-tight text-[#1d2859]">
                           {type.title}
                         </p>
-                        <p className="mt-0.5 text-xs leading-tight text-[#706559] min-[480px]:text-sm">
+                        <p className="mt-0.5 text-sm font-medium leading-tight text-[#6e7891]">
                           {type.description}
                         </p>
                       </div>
-                      <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-[#b47a13]/60" />
+                      <ChevronRight className={`mt-0.5 h-5 w-5 shrink-0 ${isSelected ? "text-[#b47a13]" : "text-[#9ba4b5]"}`} />
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Selected indicator */}
             {selectedType && (
-              <div className="flex items-center gap-2 rounded-xl bg-[#fffdf8] px-4 py-3 text-sm">
+              <div className="flex items-center gap-2 rounded-xl border border-[#eadfca] bg-white px-4 py-3 text-sm">
                 <span className="h-3 w-3 rounded-full bg-[#b47a13]" />
                 <span className="text-[#706559]">Selected:</span>
                 <span className="font-semibold text-[#b47a13]">
@@ -846,7 +829,7 @@ export function ChildAppointmentsView() {
               type="button"
               disabled={!selectedType}
               onClick={handleChooseDateTime}
-              className="flex w-full items-center justify-center gap-3 rounded-[20px] bg-gradient-to-r from-[#ce9e35] to-[#a96f0d] px-6 py-4 font-serif text-base font-bold text-white shadow-[0_6px_15px_rgba(128,79,8,0.24)] transition-transform hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 min-[480px]:rounded-[24px] min-[480px]:py-5 min-[480px]:text-lg"
+              className="flex w-full items-center justify-center gap-3 rounded-[18px] bg-[#b9903e] px-6 py-4 text-base font-medium text-white shadow-[0_8px_18px_rgba(185,144,62,.22)] transition-transform hover:-translate-y-0.5 hover:bg-[#a98437] disabled:opacity-60 disabled:hover:translate-y-0 sm:py-5 sm:text-lg"
             >
               <CalendarCheck className="h-5 w-5 min-[480px]:h-6 min-[480px]:w-6" />
               Choose Date & Time
@@ -880,7 +863,7 @@ export function ChildAppointmentsView() {
             ) : (
               <div className="space-y-3">
                 {requests.map((request) => (
-                  <RequestCard key={request.id} request={request} />
+                  <RequestCard key={request.id} request={request} onDelete={() => setPendingDelete(request)} onEdit={() => void removeRequest(request, true)} />
                 ))}
               </div>
             )}
@@ -921,42 +904,13 @@ export function ChildAppointmentsView() {
         )}
       </div>
 
-      <BottomNav />
+      <ChildBottomNav active="appointments" />
+      {pendingDelete ? <div className="fixed inset-0 z-[70] flex items-center justify-center px-5"><button aria-label="Close delete confirmation" className="absolute inset-0 bg-[#08152d]/50" onClick={() => setPendingDelete(null)} type="button" /><section aria-modal="true" className="relative w-full max-w-sm rounded-3xl bg-[#fffdf8] p-6 text-center shadow-2xl" role="dialog"><Trash2 className="mx-auto h-8 w-8 text-[#b85445]" /><h2 className="mt-4 text-xl font-medium text-[#173461]">Delete this request?</h2><p className="mt-2 text-sm text-[#6e7891]">Are you sure you want to delete your request?</p><div className="mt-6 grid grid-cols-2 gap-3"><button className="rounded-xl border border-[#e4d5bb] py-3 text-sm font-medium text-[#53617c]" onClick={() => setPendingDelete(null)} type="button">No</button><button className="rounded-xl bg-[#b85445] py-3 text-sm font-medium text-white" onClick={() => { void removeRequest(pendingDelete); setPendingDelete(null); }} type="button">Yes, delete</button></div></section></div> : null}
     </main>
   );
 }
 
 // ─── Shared Sub-components ─────────────────────────────────────────────────
-
-function BottomNav() {
-  return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 rounded-t-[28px] border-t border-[#294579] bg-[radial-gradient(circle_at_5%_0%,rgba(124,148,202,0.15),transparent_25%),linear-gradient(120deg,#0d285e,#122f69)] px-2 py-3 text-[#c7cbe0] shadow-[0_-3px_12px_rgba(20,45,103,0.15)] min-[480px]:rounded-t-[40px] min-[480px]:px-5 min-[480px]:py-5">
-      <div className="mx-auto grid max-w-[700px] grid-cols-4">
-        <NavItem icon={<House className="h-7 w-7" />} label="Home" href="/child" />
-        <NavItem active icon={<CalendarDays className="h-6 w-6" />} label="Appointments" href="/child/appointments" />
-        <NavItem icon={<MessageCircle className="h-6 w-6" />} label="Messages" href="/child/messages" />
-        <NavItem icon={<Cross className="h-6 w-6" />} label="Spiritual" href="/child/spiritual-dates" />
-      </div>
-    </nav>
-  );
-}
-
-function NavItem({ active = false, icon, label, href }: { active?: boolean; icon: ReactNode; label: string; href: string }) {
-  const router = useRouter();
-  const locale = useLocale() as AppLocale;
-
-  return (
-    <button
-      className={`flex min-w-0 flex-col items-center gap-1 border-r border-[#3d5484]/70 font-serif text-[10px] min-[480px]:text-sm ${active ? "text-[#e5a72e]" : "text-[#c7cbe0]"}`}
-      type="button"
-      onClick={() => router.push(href, { locale })}
-    >
-      {icon}
-      {active && <span className="h-[3px] w-5 rounded-full bg-[#e5a72e]" />}
-      {label}
-    </button>
-  );
-}
 
 function DetailRow({ label, value, highlight, status }: { label: string; value: string; highlight?: boolean; status?: boolean }) {
   return (
@@ -977,17 +931,17 @@ function DetailRow({ label, value, highlight, status }: { label: string; value: 
   );
 }
 
-function RequestCard({ request }: { request: AppointmentRequest }) {
+function RequestCard({ request, onDelete, onEdit }: { request: AppointmentRequest; onDelete: () => void; onEdit: () => void }) {
   const type = appointmentTypes.find((t) => t.id === request.reason);
 
   return (
-    <div className="flex items-center gap-3 rounded-[22px] border border-[#ead3a4] bg-[#fffdf8] px-4 py-4 shadow-[0_3px_8px_rgba(93,65,24,0.08)] min-[480px]:gap-4 min-[480px]:rounded-[28px] min-[480px]:px-5 min-[480px]:py-5">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#f0dab0] bg-[#fff8e9] text-[#b47a13] min-[480px]:h-14 min-[480px]:w-14">
-        <CalendarClock className="h-6 w-6 min-[480px]:h-7 min-[480px]:w-7" />
+    <div className="flex items-center gap-3 rounded-[18px] border border-[#ead3a4] bg-[#fffdf8] px-3.5 py-3 shadow-[0_3px_8px_rgba(93,65,24,0.08)]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#f0dab0] bg-[#fff8e9] text-[#b47a13]">
+        <CalendarClock className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-serif text-lg font-bold min-[480px]:text-xl">{type?.title}</p>
-        <p className="mt-0.5 text-sm text-[#706559]">
+        <p className="text-base font-medium text-[#173461]">{type?.title}</p>
+        <p className="mt-0.5 text-xs font-medium text-[#706559] sm:text-sm">
           {displayDateLong(request.requestedDate)} at {displayTime(request.requestedStartTime)}
         </p>
       </div>
@@ -1002,6 +956,7 @@ function RequestCard({ request }: { request: AppointmentRequest }) {
       >
         {request.status}
       </span>
+      {request.status === "PENDING" ? <span className="flex shrink-0 gap-1"><button aria-label="Edit request" className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ead3a4] text-[#b47a13] hover:bg-[#fff8e9]" onClick={onEdit} type="button"><Pencil className="h-4 w-4" /></button><button aria-label="Delete request" className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#f1d3cf] text-[#b85445] hover:bg-[#fff0ec]" onClick={onDelete} type="button"><Trash2 className="h-4 w-4" /></button></span> : null}
     </div>
   );
 }
@@ -1010,13 +965,13 @@ function HistoryCard({ appointment }: { appointment: Appointment }) {
   const type = appointmentTypes.find((t) => t.id === appointment.reason);
 
   return (
-    <div className="flex items-center gap-3 rounded-[22px] border border-[#ead3a4] bg-[#fffdf8] px-4 py-4 shadow-[0_3px_8px_rgba(93,65,24,0.08)] min-[480px]:gap-4 min-[480px]:rounded-[28px] min-[480px]:px-5 min-[480px]:py-5">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#f0dab0] bg-[#fff8e9] text-[#b47a13] min-[480px]:h-14 min-[480px]:w-14">
-        <Calendar className="h-6 w-6 min-[480px]:h-7 min-[480px]:w-7" />
+    <div className="flex items-center gap-3 rounded-[18px] border border-[#ead3a4] bg-[#fffdf8] px-3.5 py-3 shadow-[0_3px_8px_rgba(93,65,24,0.08)]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#f0dab0] bg-[#fff8e9] text-[#b47a13]">
+        <Calendar className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-serif text-lg font-bold min-[480px]:text-xl">{type?.title}</p>
-        <p className="mt-0.5 text-sm text-[#706559]">
+        <p className="text-base font-medium text-[#173461]">{type?.title}</p>
+        <p className="mt-0.5 text-xs font-medium text-[#706559] sm:text-sm">
           {displayDateLong(appointment.scheduleDate)} at {displayTime(appointment.startTime)}
         </p>
       </div>

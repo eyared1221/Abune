@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
+import { ChildBottomNav } from "@/components/dashboard/child-navigation";
 
 export function ChildDashboardShell() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -80,9 +81,7 @@ export function ChildDashboardShell() {
         </section>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-[#29436c] bg-[radial-gradient(circle_at_10%_0,rgba(74,109,164,.35),transparent_35%),linear-gradient(115deg,#061c42,#0c2c5d)] px-3 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 text-white md:px-8 xl:hidden">
-        <div className="grid grid-cols-4"><BottomNav active icon={<House />} label="Home" /><BottomNav icon={<CalendarDays />} label="Appointments" href="/child/appointments" /><BottomNav icon={<MessageCircle />} label="Messages" href="/child/messages" /><BottomNav icon={<Cross />} label="Spiritual" href="/child/spiritual-dates" /></div>
-      </nav>
+      <ChildBottomNav active="home" />
     </main>
   );
 }
@@ -90,11 +89,6 @@ export function ChildDashboardShell() {
 function DashboardCard({ icon, tone, title, detail, meta, href }: { icon: ReactNode; tone: "gold" | "blue"; title: string; detail?: string; meta: ReactNode; href: string }) {
   const router = useRouter(); const locale = useLocale() as AppLocale;
   return <button className="flex w-full items-center gap-3 rounded-[17px] border border-[#eee4d4] bg-[#fffdfa] px-4 py-3 text-left shadow-[0_3px_10px_rgba(30,34,40,.09)] transition-all hover:-translate-y-0.5 hover:border-[#dec488] hover:shadow-[0_10px_20px_rgba(30,34,40,.11)] md:min-h-[105px] md:px-5" onClick={() => router.push(href, { locale })} type="button"><span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] text-white shadow-inner ${tone === "gold" ? "bg-[linear-gradient(135deg,#d69a22,#a76b08)]" : "bg-[linear-gradient(135deg,#092a58,#123c73)]"}`}>{icon}</span><span className="min-w-0 flex-1"><span className="block text-[18px] font-semibold leading-5 text-[#1d2859]">{title}</span>{detail ? <span className="mt-1 block text-[15px] font-medium leading-5 text-[#33415f]">{detail}</span> : null}<span className="mt-1 block text-[14px] font-medium leading-4 text-[#6e7891]">{meta}</span></span><ChevronRight className="h-5 w-5 shrink-0 text-[#34383f]" /></button>;
-}
-
-function BottomNav({ active = false, icon, label, href }: { active?: boolean; icon: ReactNode; label: string; href?: string }) {
-  const router = useRouter(); const locale = useLocale() as AppLocale;
-  return <button className={`relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[19px] text-[11px] ${active ? "bg-white/10 text-[#f2b63a]" : "text-white"}`} onClick={() => href && router.push(href, { locale })} type="button"><span className="h-6 w-6 [&>svg]:h-6 [&>svg]:w-6">{icon}</span>{label}{active ? <span className="absolute bottom-0 h-1 w-1 rounded-full bg-[#f2b63a]" /> : null}</button>;
 }
 
 function DrawerItem({ icon, label, href, danger = false, onClick }: { icon: ReactNode; label: string; href?: string; danger?: boolean; onClick?: () => void }) {
