@@ -139,13 +139,13 @@ export async function updateAppointmentStatusForFather({
     }
 
     if (appointment.status === "CONFIRMED") {
-      if (action !== "COMPLETE" && action !== "CANCEL") {
+      if (action !== "COMPLETE" && action !== "CANCEL" && action !== "FOLLOW_UP") {
         throw new AppointmentConflictError(
           "A confirmed appointment can only be completed or canceled.",
         );
       }
 
-      const status = action === "COMPLETE" ? "COMPLETED" : "CANCELLED";
+      const status = action === "COMPLETE" ? "COMPLETED" : action === "FOLLOW_UP" ? "RESCHEDULED" : "CANCELLED";
       await client.query(
         `
           UPDATE appointments

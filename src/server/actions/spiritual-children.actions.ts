@@ -4,6 +4,9 @@ import { headers } from "next/headers";
 import { ZodError } from "zod";
 
 import { auth } from "@/lib/auth";
+import { spiritualChildren } from "@/db/schema";
+import { db, pool } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { isSpiritualFather } from "@/lib/permissions";
 import {
   listChildren,
@@ -63,10 +66,7 @@ function getSafeActionError(error: unknown) {
           error: "Your session has expired. Please sign in again.",
         };
       case "FORBIDDEN":
-        return {
-          error:
-            "Only a spiritual-father account can manage spiritual children.",
-        };
+        return { error: "You are not permitted to manage spiritual children." };
       default:
         console.error(
           "Spiritual-child server action failed:",
@@ -90,11 +90,26 @@ export async function createSpiritualChildAction(
   submission: NewSpiritualChildSubmission,
 ): Promise<SpiritualChildActionResult> {
   try {
-    const father = await requireSpiritualFather();
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) throw new Error("UNAUTHENTICATED");
+    const user = session.user as SessionUserWithRole;
+    let fatherUserId = isSpiritualFather(user.role) ? user.id : undefined;
+
+    // Child self-registration uses the single configured spiritual father
+    // until a direct invitation/linking flow is introduced.
+    if (!fatherUserId) {
+      const result = await pool.query<{ id: string }>('SELECT id FROM "user" WHERE role = $1 LIMIT 1', ["SPIRITUAL_FATHER"]);
+      fatherUserId = result.rows[0]?.id;
+    }
+    if (!fatherUserId) throw new Error("FORBIDDEN");
     const child = await registerSpiritualChild(
-      father.id,
+      fatherUserId,
       submission,
     );
+
+    if (!isSpiritualFather(user.role)) {
+      await db.update(spiritualChildren).set({ linkedUserId: user.id }).where(eq(spiritualChildren.id, child.id));
+    }
 
     return {
       success: true,

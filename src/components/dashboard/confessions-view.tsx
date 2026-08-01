@@ -48,6 +48,7 @@ type ConfessionRow = {
   requestedOn: string;
   guidance: string[];
   canonId?: string;
+  appointmentId?: string;
 };
 
 function formatDate(value: string) {
@@ -122,6 +123,7 @@ function toAppointmentRow(
         : "warning",
     requestedOn: formatDate(appointment.scheduleDate),
     guidance: [],
+    appointmentId: appointment.id,
   };
 }
 
@@ -268,6 +270,20 @@ export function ConfessionsView() {
         .some((value) => value.toLowerCase().includes(query)),
     );
   }, [rows, searchText]);
+
+  const updateScheduledAppointment = async (appointmentId: string, action: "COMPLETE" | "FOLLOW_UP") => {
+    const response = await fetch(`/api/appointments/${appointmentId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      setError(data.error || "Unable to update appointment.");
+      return;
+    }
+    setAppointments((current) => current.map((appointment) => appointment.id === appointmentId ? { ...appointment, status: action === "COMPLETE" ? "COMPLETED" : "RESCHEDULED" } : appointment));
+  };
 
   const stats = [
     {
@@ -452,10 +468,7 @@ export function ConfessionsView() {
                         key={row.id}
                         className="grid grid-cols-[1.7fr_1.1fr_1fr_130px_120px] items-center gap-6 px-7 py-5 transition-colors hover:bg-[#fcfaf6]"
                       >
-                        <div className="flex min-w-0 items-center gap-4">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f4ebff] text-base font-extrabold text-[#8e59ff]">
-                            {initials(row.childName)}
-                          </div>
+                        <div className="flex min-w-0 items-center">
                           <div className="min-w-0">
                             <p className="truncate font-extrabold text-[#1d2859]">{row.childName}</p>
                             <p className="mt-1 text-sm font-medium text-[#7b8499]">{row.childPhone ?? "No phone number"}</p>
@@ -473,7 +486,7 @@ export function ConfessionsView() {
                         <p className="text-sm font-semibold text-[#56617d]">{row.requestedOn}</p>
                         <Badge variant={row.statusVariant} className="w-fit rounded-full px-3 py-1">{row.status}</Badge>
                         <div className="flex justify-end gap-1.5">
-                          {row.canonId ? <><button aria-label="Edit canon" className="flex h-9 w-9 items-center justify-center rounded-xl text-[#9b7525] hover:bg-[#faf6ed]" onClick={() => openEditCanon(row)} type="button"><Pencil className="h-4 w-4" /></button><button aria-label="Delete canon" className="flex h-9 w-9 items-center justify-center rounded-xl text-[#cf4f48] hover:bg-[#fff4f3]" onClick={() => void deleteCanon(row)} type="button"><Trash2 className="h-4 w-4" /></button></> : <span className="text-sm font-semibold text-[#8a93a7]">—</span>}
+                          {activeTab === "Scheduled" && row.appointmentId ? <><button className="rounded-[10px] bg-[#d4ab4f] px-3 py-2 text-xs font-bold text-white hover:bg-[#c49b3f]" onClick={() => void updateScheduledAppointment(row.appointmentId!, "COMPLETE")} type="button">Completed</button><button className="rounded-[10px] border border-[#e5c97f] px-3 py-2 text-xs font-bold text-[#9b7525] hover:bg-[#fff8e9]" onClick={() => void updateScheduledAppointment(row.appointmentId!, "FOLLOW_UP")} type="button">Needs follow-up</button></> : row.canonId ? <><button aria-label="Edit canon" className="flex h-9 w-9 items-center justify-center rounded-xl text-[#9b7525] hover:bg-[#faf6ed]" onClick={() => openEditCanon(row)} type="button"><Pencil className="h-4 w-4" /></button><button aria-label="Delete canon" className="flex h-9 w-9 items-center justify-center rounded-xl text-[#cf4f48] hover:bg-[#fff4f3]" onClick={() => void deleteCanon(row)} type="button"><Trash2 className="h-4 w-4" /></button></> : <span className="text-sm font-semibold text-[#8a93a7]">—</span>}
                         </div>
                       </div>
                     ))

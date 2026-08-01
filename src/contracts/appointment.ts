@@ -29,7 +29,7 @@ export type FatherAppointmentsResponse = {
 };
 
 export const updateAppointmentStatusSchema = z.object({
-  action: z.enum(["COMPLETE", "CANCEL", "REOPEN"]),
+  action: z.enum(["COMPLETE", "CANCEL", "REOPEN", "FOLLOW_UP"]),
 });
 
 export type UpdateAppointmentStatusInput = z.infer<

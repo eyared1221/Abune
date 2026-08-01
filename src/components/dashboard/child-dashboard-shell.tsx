@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   MessageCircle,
+  Plus,
   Settings,
   UserRound,
   X,
@@ -23,10 +24,15 @@ import { useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
 import { ChildBottomNav } from "@/components/dashboard/child-navigation";
+import { AddSpiritualChildModal, type NewSpiritualChildSubmission } from "@/components/dashboard/add-spiritual-child-modal";
+import { createSpiritualChildAction } from "@/server/actions/spiritual-children.actions";
 
 export function ChildDashboardShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [addChildOpen, setAddChildOpen] = useState(false);
+  const [savingChild, setSavingChild] = useState(false);
+  const [childSaveError, setChildSaveError] = useState<string | null>(null);
   const router = useRouter();
   const locale = useLocale() as AppLocale;
 
@@ -36,6 +42,19 @@ export function ChildDashboardShell() {
     await authClient.signOut();
     router.replace("/login", { locale });
     router.refresh();
+  };
+
+  const handleSaveChild = async (submission: NewSpiritualChildSubmission) => {
+    setSavingChild(true);
+    setChildSaveError(null);
+    const result = await createSpiritualChildAction(submission);
+    if (!result.success) {
+      setChildSaveError(result.error);
+      setSavingChild(false);
+      return;
+    }
+    setSavingChild(false);
+    setAddChildOpen(false);
   };
 
   return (
@@ -73,6 +92,8 @@ export function ChildDashboardShell() {
           <img alt="Welcome Selam - Walk in faith, grow in grace" className="aspect-[1.39/1] h-auto w-full object-cover object-center md:aspect-[2.2/1]" src="/images/home.png" />
         </section>
 
+        <button className="mt-5 flex w-full items-center justify-center gap-3 rounded-[18px] bg-[#b9903e] px-5 py-4 text-base font-medium text-white shadow-[0_8px_18px_rgba(185,144,62,.22)] transition-colors hover:bg-[#a98437] md:w-auto" onClick={() => setAddChildOpen(true)} type="button"><Plus className="h-5 w-5" />Add Spiritual Child</button>
+
         <section className="mt-5 grid gap-3 md:grid-cols-2 md:gap-5 xl:mt-7">
           <DashboardCard icon={<CalendarDays />} tone="gold" title="Upcoming Appointment" detail="Sunday School" meta="May 25, 2025 · 10:00 AM" href="/child/appointments" />
           <DashboardCard icon={<ClipboardList />} tone="gold" title="Pending Request" meta="1 request waiting for approval" href="/child/appointments" />
@@ -82,6 +103,7 @@ export function ChildDashboardShell() {
       </div>
 
       <ChildBottomNav active="home" />
+      <AddSpiritualChildModal open={addChildOpen} onClose={() => { if (!savingChild) { setChildSaveError(null); setAddChildOpen(false); } }} onSave={handleSaveChild} saving={savingChild} submitError={childSaveError} />
     </main>
   );
 }
