@@ -2,7 +2,12 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { authClient } from "../services";
+import {
+  authClient,
+  clearBearerToken,
+  getBearerToken,
+  saveBearerTokenFromResponse,
+} from "../lib/auth-client";
 import "../login.css";
 
 export type MobileSession = { user?: { name?: string; email?: string; role?: string } } | null;
@@ -20,18 +25,32 @@ export function LoginPage({ configured, onSignedIn }: { configured: boolean; onS
     event.preventDefault();
     setBusy(true);
     setError("");
+    clearBearerToken();
     try {
-      const result = await authClient.signIn.email({ email: email.trim(), password, rememberMe });
-      if (result.error) throw new Error(result.error.message || "Invalid email or password.");
+      const result = await authClient.signIn.email(
+        { email: email.trim(), password, rememberMe },
+        {
+          onSuccess: (context) => {
+            saveBearerTokenFromResponse(context.response);
+          },
+        },
+      );
+      if (result.error) throw new Error("Email or password is incorrect.");
+      if (!getBearerToken()) throw new Error("Login was accepted, but the mobile authentication token was not received.");
       const session = (await authClient.getSession()).data as MobileSession;
-      if (session?.user?.role !== "SPIRITUAL_CHILD") {
-        await authClient.signOut();
+      if (!session?.user) {
+        clearBearerToken();
+        throw new Error("The mobile login session could not be verified.");
+      }
+      if (session.user.role !== "SPIRITUAL_CHILD") {
+        try { await authClient.signOut(); } finally { clearBearerToken(); }
         throw new Error("This mobile app is for Spiritual Child accounts.");
       }
       onSignedIn(session);
       navigate("/child", { replace: true });
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Unable to sign in.");
+      const message = reason instanceof Error ? reason.message : "The mobile login session could not be verified.";
+      setError(message === "Failed to fetch" ? "The mobile login session could not be verified." : message);
     } finally {
       setBusy(false);
     }

@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { after } from "next/server";
-import { username } from "better-auth/plugins";
+import { bearer, username } from "better-auth/plugins";
 
 import {
   isValidInternalRegistrationSecret,
@@ -28,6 +28,7 @@ if (!betterAuthUrl) {
 // These are local application origins, not publicly hosted web origins.
 const trustedOrigins = [
   betterAuthUrl,
+  "http://localhost",
   "https://localhost",
   "capacitor://localhost",
 ];
@@ -108,6 +109,10 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    // Enables bearer-token sessions for the Capacitor mobile client while
+    // preserving the web portal's existing cookie-based sessions.
+    bearer(),
+
     username({
       minUsernameLength: 3,
       maxUsernameLength: 30,
