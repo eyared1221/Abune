@@ -23,7 +23,14 @@ if (!betterAuthUrl) {
   throw new Error("BETTER_AUTH_URL is missing.");
 }
 
-const trustedOrigins = [betterAuthUrl];
+// Capacitor Android serves the bundled app from https://localhost.  Older
+// Capacitor configurations can use capacitor://localhost, so retain both.
+// These are local application origins, not publicly hosted web origins.
+const trustedOrigins = [
+  betterAuthUrl,
+  "https://localhost",
+  "capacitor://localhost",
+];
 
 if (publicAppUrl && publicAppUrl !== betterAuthUrl) {
   trustedOrigins.push(publicAppUrl);
