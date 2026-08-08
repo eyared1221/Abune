@@ -22,6 +22,17 @@ import { validateFatherInvitation } from "@/server/services/father-invitation.se
 
 export const runtime = "nodejs";
 
+export function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
 const requestSchema = z
   .object({
     challengeId: z.string().uuid(),

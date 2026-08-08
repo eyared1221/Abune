@@ -18,6 +18,17 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Registration is intentionally public. These headers let the
+        // Capacitor/WebView client call the same verified registration API
+        // used by the web portal.
+        source: "/api/registration/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "POST, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type" },
+        ],
+      },
     ];
   },
 };
