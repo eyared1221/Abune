@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     requestedEndTime: row.requestedEndTime,
     meetingMethod: row.meetingMethod,
     location: row.location,
+    responseNote: row.responseNote,
     createdAt: row.createdAt.toISOString(),
   }));
 
