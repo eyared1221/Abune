@@ -37,10 +37,11 @@ export class AppointmentConflictError extends Error {
 
 const childNameSql = `
   COALESCE(
-    NULLIF(to_jsonb(sc)->>'legal_name', ''),
-    NULLIF(to_jsonb(sc)->>'legalName', ''),
+    NULLIF(u.name, ''),
     NULLIF(to_jsonb(sc)->>'baptismal_name', ''),
     NULLIF(to_jsonb(sc)->>'baptismalName', ''),
+    NULLIF(to_jsonb(sc)->>'legal_name', ''),
+    NULLIF(to_jsonb(sc)->>'legalName', ''),
     NULLIF(to_jsonb(sc)->>'display_name', ''),
     NULLIF(to_jsonb(sc)->>'displayName', ''),
     NULLIF(to_jsonb(sc)->>'name', ''),
@@ -89,6 +90,8 @@ export async function listAppointmentsForFather(
       FROM appointments AS a
       INNER JOIN spiritual_children AS sc
         ON sc.id = a.spiritual_child_id
+      LEFT JOIN "user" AS u
+        ON u.id = sc.linked_user_id
       WHERE a.father_user_id = $1
       ORDER BY
         CASE a.status

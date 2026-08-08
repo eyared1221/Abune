@@ -56,10 +56,11 @@ type LockedRequestRow = {
 
 const childNameSql = `
   COALESCE(
-    NULLIF(to_jsonb(sc)->>'legal_name', ''),
-    NULLIF(to_jsonb(sc)->>'legalName', ''),
+    NULLIF(u.name, ''),
     NULLIF(to_jsonb(sc)->>'baptismal_name', ''),
     NULLIF(to_jsonb(sc)->>'baptismalName', ''),
+    NULLIF(to_jsonb(sc)->>'legal_name', ''),
+    NULLIF(to_jsonb(sc)->>'legalName', ''),
     NULLIF(to_jsonb(sc)->>'display_name', ''),
     NULLIF(to_jsonb(sc)->>'displayName', ''),
     NULLIF(to_jsonb(sc)->>'name', ''),
@@ -111,6 +112,8 @@ async function findRequestByIdWithExecutor(
       FROM appointment_requests AS ar
       INNER JOIN spiritual_children AS sc
         ON sc.id = ar.spiritual_child_id
+      LEFT JOIN "user" AS u
+        ON u.id = sc.linked_user_id
       WHERE ar.id = $1
         AND ar.father_user_id = $2
       LIMIT 1
@@ -147,6 +150,8 @@ export async function listRequestsForFather(
       FROM appointment_requests AS ar
       INNER JOIN spiritual_children AS sc
         ON sc.id = ar.spiritual_child_id
+      LEFT JOIN "user" AS u
+        ON u.id = sc.linked_user_id
       WHERE ar.father_user_id = $1
       ORDER BY
         CASE ar.status

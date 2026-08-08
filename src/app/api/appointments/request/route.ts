@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 
-import { appointmentRequests, availabilityEntries, spiritualChildren } from "@/db/schema";
+import { appointmentRequests, availabilityEntries } from "@/db/schema";
 import { getApiSession } from "@/lib/api-session";
 import { db } from "@/lib/db";
+import { resolveSpiritualChildForUser } from "@/server/services/spiritual-child-account.service";
 import { appointmentReasonValues, meetingMethodValues } from "@/types/availability";
 
 export const dynamic = "force-dynamic";
@@ -15,11 +16,11 @@ export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get("type");
   if (type !== "requests" && type !== "history") return NextResponse.json({ error: "Invalid request list type." }, { status: 400 });
 
-  let [child] = await db.select().from(spiritualChildren).where(eq(spiritualChildren.linkedUserId, session.user.id)).limit(1);
-  // Supports the current one-father development setup before each child user
-  // is explicitly linked to its profile.
-  if (!child) [child] = await db.select().from(spiritualChildren).orderBy(desc(spiritualChildren.createdAt)).limit(1);
-  if (!child) return NextResponse.json({ requests: [], appointments: [] });
+  const child = await resolveSpiritualChildForUser({
+    userId: session.user.id,
+    userName: session.user.name,
+  });
+  if (!child) return NextResponse.json({ error: "No spiritual-child profile is linked to this account." }, { status: 403 });
 
   const rows = await db.select().from(appointmentRequests)
     .where(eq(appointmentRequests.spiritualChildId, child.id))
@@ -59,9 +60,11 @@ export async function POST(request: NextRequest) {
       const [slot] = await tx.select().from(availabilityEntries).where(eq(availabilityEntries.id, input.availabilityEntryId!)).limit(1);
       if (!slot) throw new Error("SLOT_NOT_FOUND");
 
-      let [child] = await tx.select().from(spiritualChildren).where(eq(spiritualChildren.linkedUserId, session.user.id)).limit(1);
-      // Supports the existing single-father development setup until a child login is linked.
-      if (!child) [child] = await tx.select().from(spiritualChildren).where(eq(spiritualChildren.fatherUserId, slot.fatherUserId)).limit(1);
+      const child = await resolveSpiritualChildForUser({
+        fatherUserId: slot.fatherUserId,
+        userId: session.user.id,
+        userName: session.user.name,
+      });
       if (!child) throw new Error("CHILD_NOT_FOUND");
 
       const [createdRequest] = await tx.insert(appointmentRequests).values({
