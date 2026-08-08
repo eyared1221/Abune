@@ -1,0 +1,1 @@
+.home-summary,.quick-updates{grid-template-columns:1fr}.quick-card{min-height:112px;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:14px;align-items:center}.quick-card .quick-icon{grid-row:1 / 4}.quick-card b,.quick-card strong,.quick-card small{margin:0}.quick-card>svg{top:50%;right:18px;bottom:auto;transform:translateY(-50%)}
