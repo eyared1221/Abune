@@ -38,24 +38,11 @@ export class AppointmentConflictError extends Error {
 const childNameSql = `
   COALESCE(
     NULLIF(u.name, ''),
-    NULLIF(to_jsonb(sc)->>'baptismal_name', ''),
-    NULLIF(to_jsonb(sc)->>'baptismalName', ''),
-    NULLIF(to_jsonb(sc)->>'legal_name', ''),
-    NULLIF(to_jsonb(sc)->>'legalName', ''),
-    NULLIF(to_jsonb(sc)->>'display_name', ''),
-    NULLIF(to_jsonb(sc)->>'displayName', ''),
-    NULLIF(to_jsonb(sc)->>'name', ''),
     'Spiritual Child'
   )
 `;
 
-const childPhoneSql = `
-  COALESCE(
-    NULLIF(to_jsonb(sc)->>'phone_number', ''),
-    NULLIF(to_jsonb(sc)->>'phoneNumber', ''),
-    NULLIF(to_jsonb(sc)->>'phone', '')
-  )
-`;
+const childPhoneSql = `NULL::text`;
 
 function serializeAppointment(
   appointment: AppointmentDatabaseRow,
@@ -76,7 +63,7 @@ export async function listAppointmentsForFather(
     `
       SELECT
         a.id,
-        a.spiritual_child_id AS "childId",
+        a.child_user_id AS "childId",
         ${childNameSql} AS "childName",
         ${childPhoneSql} AS "childPhone",
         a.reason,
@@ -88,10 +75,8 @@ export async function listAppointmentsForFather(
         a.location,
         a.notes
       FROM appointments AS a
-      INNER JOIN spiritual_children AS sc
-        ON sc.id = a.spiritual_child_id
       LEFT JOIN "user" AS u
-        ON u.id = sc.linked_user_id
+        ON u.id = a.child_user_id
       WHERE a.father_user_id = $1
       ORDER BY
         CASE a.status

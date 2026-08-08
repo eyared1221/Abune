@@ -25,11 +25,13 @@ export const appointments = pgTable(
 
     fatherUserId: text("father_user_id").notNull(),
 
+    // Legacy profile link. New mobile appointments are owned by childUserId.
     spiritualChildId: uuid("spiritual_child_id")
-      .notNull()
       .references(() => spiritualChildren.id, {
         onDelete: "cascade",
       }),
+
+    childUserId: text("child_user_id"),
 
     availabilityEntryId: uuid("availability_entry_id").references(
       () => availabilityEntries.id,
@@ -119,6 +121,7 @@ export const appointments = pgTable(
     index("appointments_child_idx").on(
       table.spiritualChildId,
     ),
+    index("appointments_child_user_idx").on(table.childUserId),
   ],
 );
 

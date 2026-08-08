@@ -43,7 +43,7 @@ type StatsDatabaseRow = {
 type LockedRequestRow = {
   id: string;
   fatherUserId: string;
-  spiritualChildId: string;
+  childUserId: string | null;
   availabilityEntryId: string | null;
   status: string;
   reason: string;
@@ -57,24 +57,11 @@ type LockedRequestRow = {
 const childNameSql = `
   COALESCE(
     NULLIF(u.name, ''),
-    NULLIF(to_jsonb(sc)->>'baptismal_name', ''),
-    NULLIF(to_jsonb(sc)->>'baptismalName', ''),
-    NULLIF(to_jsonb(sc)->>'legal_name', ''),
-    NULLIF(to_jsonb(sc)->>'legalName', ''),
-    NULLIF(to_jsonb(sc)->>'display_name', ''),
-    NULLIF(to_jsonb(sc)->>'displayName', ''),
-    NULLIF(to_jsonb(sc)->>'name', ''),
     'Spiritual Child'
   )
 `;
 
-const childPhoneSql = `
-  COALESCE(
-    NULLIF(to_jsonb(sc)->>'phone_number', ''),
-    NULLIF(to_jsonb(sc)->>'phoneNumber', ''),
-    NULLIF(to_jsonb(sc)->>'phone', '')
-  )
-`;
+const childPhoneSql = `NULL::text`;
 
 function serializeRequest(
   row: RequestDatabaseRow,
@@ -95,7 +82,7 @@ async function findRequestByIdWithExecutor(
     `
       SELECT
         ar.id,
-        ar.spiritual_child_id AS "childId",
+        ar.child_user_id AS "childId",
         ${childNameSql} AS "childName",
         ${childPhoneSql} AS "childPhone",
         ar.reason,
@@ -110,10 +97,8 @@ async function findRequestByIdWithExecutor(
         ar.reviewed_at AS "reviewedAt",
         ar.created_at AS "createdAt"
       FROM appointment_requests AS ar
-      INNER JOIN spiritual_children AS sc
-        ON sc.id = ar.spiritual_child_id
       LEFT JOIN "user" AS u
-        ON u.id = sc.linked_user_id
+        ON u.id = ar.child_user_id
       WHERE ar.id = $1
         AND ar.father_user_id = $2
       LIMIT 1
@@ -133,7 +118,7 @@ export async function listRequestsForFather(
     `
       SELECT
         ar.id,
-        ar.spiritual_child_id AS "childId",
+        ar.child_user_id AS "childId",
         ${childNameSql} AS "childName",
         ${childPhoneSql} AS "childPhone",
         ar.reason,
@@ -148,10 +133,8 @@ export async function listRequestsForFather(
         ar.reviewed_at AS "reviewedAt",
         ar.created_at AS "createdAt"
       FROM appointment_requests AS ar
-      INNER JOIN spiritual_children AS sc
-        ON sc.id = ar.spiritual_child_id
       LEFT JOIN "user" AS u
-        ON u.id = sc.linked_user_id
+        ON u.id = ar.child_user_id
       WHERE ar.father_user_id = $1
       ORDER BY
         CASE ar.status
@@ -227,7 +210,7 @@ export async function reviewRequestForFather({
         SELECT
           id,
           father_user_id AS "fatherUserId",
-          spiritual_child_id AS "spiritualChildId",
+          child_user_id AS "childUserId",
           availability_entry_id AS "availabilityEntryId",
           status,
           reason,
@@ -364,6 +347,7 @@ export async function reviewRequestForFather({
             INSERT INTO appointments (
               father_user_id,
               spiritual_child_id,
+              child_user_id,
               availability_entry_id,
               active_availability_entry_id,
               appointment_request_id,
@@ -379,13 +363,13 @@ export async function reviewRequestForFather({
               updated_at
             )
             VALUES (
-              $1, $2, $3, $4, $5, $6, 'CONFIRMED',
-              $7, $8, $9, $10, $11, $12, NOW(), NOW()
+              $1, NULL, $2, $3, $4, $5, 'CONFIRMED',
+              $6, $7, $8, $9, $10, $11, NOW(), NOW()
             )
           `,
           [
             fatherUserId,
-            request.spiritualChildId,
+            request.childUserId,
             request.availabilityEntryId,
             request.availabilityEntryId,
             request.id,

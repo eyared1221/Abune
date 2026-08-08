@@ -78,6 +78,20 @@
       "when": 1785366762308,
       "tag": "0010_petite_bloodaxe",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1786169000000,
+      "tag": "0011_mobile_user_appointments",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786220014930,
+      "tag": "0012_fixed_smasher",
+      "breakpoints": true
     }
   ]
 }

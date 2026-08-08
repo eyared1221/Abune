@@ -31,11 +31,13 @@ export const appointmentRequests = pgTable(
     fatherUserId: text("father_user_id").notNull(),
 
     // Profile ID of the Spiritual Child who submitted the request.
+    // Legacy profile link. New mobile requests are owned by childUserId.
     spiritualChildId: uuid("spiritual_child_id")
-      .notNull()
       .references(() => spiritualChildren.id, {
         onDelete: "cascade",
       }),
+
+    childUserId: text("child_user_id"),
 
     // Historical link to the slot selected by the child.
     availabilityEntryId: uuid("availability_entry_id").references(
@@ -124,6 +126,7 @@ export const appointmentRequests = pgTable(
     index("appointment_requests_child_idx").on(
       table.spiritualChildId,
     ),
+    index("appointment_requests_child_user_idx").on(table.childUserId),
     index("appointment_requests_slot_idx").on(
       table.availabilityEntryId,
     ),

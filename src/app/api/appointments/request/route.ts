@@ -4,7 +4,6 @@ import { desc, eq } from "drizzle-orm";
 import { appointmentRequests, availabilityEntries } from "@/db/schema";
 import { getApiSession } from "@/lib/api-session";
 import { db } from "@/lib/db";
-import { resolveSpiritualChildForUser } from "@/server/services/spiritual-child-account.service";
 import { appointmentReasonValues, meetingMethodValues } from "@/types/availability";
 
 export const dynamic = "force-dynamic";
@@ -16,14 +15,8 @@ export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get("type");
   if (type !== "requests" && type !== "history") return NextResponse.json({ error: "Invalid request list type." }, { status: 400 });
 
-  const child = await resolveSpiritualChildForUser({
-    userId: session.user.id,
-    userName: session.user.name,
-  });
-  if (!child) return NextResponse.json({ error: "No spiritual-child profile is linked to this account." }, { status: 403 });
-
   const rows = await db.select().from(appointmentRequests)
-    .where(eq(appointmentRequests.spiritualChildId, child.id))
+    .where(eq(appointmentRequests.childUserId, session.user.id))
     .orderBy(desc(appointmentRequests.createdAt));
 
   const requests = rows.map((row) => ({
@@ -60,16 +53,9 @@ export async function POST(request: NextRequest) {
       const [slot] = await tx.select().from(availabilityEntries).where(eq(availabilityEntries.id, input.availabilityEntryId!)).limit(1);
       if (!slot) throw new Error("SLOT_NOT_FOUND");
 
-      const child = await resolveSpiritualChildForUser({
-        fatherUserId: slot.fatherUserId,
-        userId: session.user.id,
-        userName: session.user.name,
-      });
-      if (!child) throw new Error("CHILD_NOT_FOUND");
-
       const [createdRequest] = await tx.insert(appointmentRequests).values({
         fatherUserId: slot.fatherUserId,
-        spiritualChildId: child.id,
+        childUserId: session.user.id,
         availabilityEntryId: slot.id,
         activeAvailabilityEntryId: slot.id,
         reason: input.reason as typeof appointmentReasonValues[number],
@@ -86,7 +72,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "REQUEST_CREATE_FAILED";
     if (message === "SLOT_NOT_FOUND") return NextResponse.json({ error: "This slot is no longer available." }, { status: 404 });
-    if (message === "CHILD_NOT_FOUND") return NextResponse.json({ error: "No spiritual-child profile is available for this request." }, { status: 400 });
     if (message.includes("unique") || message.includes("duplicate")) return NextResponse.json({ error: "This slot has already been requested." }, { status: 409 });
     console.error("Unable to create appointment request.", error);
     return NextResponse.json({ error: "Unable to submit the appointment request." }, { status: 500 });
