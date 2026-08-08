@@ -8,6 +8,7 @@ import { AboutPage } from "./pages/AboutPage";
 import { AppointmentsPage } from "./pages/AppointmentsPage";
 import { ChildHomePage } from "./pages/ChildHomePage";
 import { CompleteProfilePage } from "./pages/CompleteProfilePage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage, type MobileSession } from "./pages/LoginPage";
 import { MessagesPage } from "./pages/MessagesPage";
 import { MorePage } from "./pages/MorePage";
@@ -32,7 +33,7 @@ export default function App() {
   const [checking, setChecking] = useState(true);
   useEffect(() => { if (!isApiConfigured) { setChecking(false); return; } void authClient.getSession().then((result) => setSession((result.data as Session) ?? null)).catch(() => setSession(null)).finally(() => setChecking(false)); }, []);
   if (checking) return <div className="splash"><img alt="Abune" src="/icons/abune-512.png" /></div>;
-  if (!session?.user || session.user.role !== "SPIRITUAL_CHILD") return <Routes><Route element={<LoginPage configured={isApiConfigured} onSignedIn={setSession} />} path="*" /><Route element={<RegisterPage />} path="/register" /></Routes>;
+  if (!session?.user || session.user.role !== "SPIRITUAL_CHILD") return <Routes><Route element={<LoginPage configured={isApiConfigured} onSignedIn={setSession} />} path="*" /><Route element={<RegisterPage />} path="/register" /><Route element={<ForgotPasswordPage />} path="/forgot-password" /></Routes>;
   async function logout() {
     try { await authClient.signOut(); } catch { /* Clear the local session even if the server cannot be reached. */ }
     clearBearerToken();
