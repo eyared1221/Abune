@@ -71,7 +71,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ request: created }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "REQUEST_CREATE_FAILED";
+    const databaseError = error as { code?: string; constraint?: string };
     if (message === "SLOT_NOT_FOUND") return NextResponse.json({ error: "This slot is no longer available." }, { status: 404 });
+    if (databaseError.code === "42703" || (databaseError.code === "23502" && databaseError.constraint?.includes("spiritual_child_id"))) {
+      return NextResponse.json({ error: "The appointment database migration has not been applied to this environment." }, { status: 503 });
+    }
     if (message.includes("unique") || message.includes("duplicate")) return NextResponse.json({ error: "This slot has already been requested." }, { status: 409 });
     console.error("Unable to create appointment request.", error);
     return NextResponse.json({ error: "Unable to submit the appointment request." }, { status: 500 });
