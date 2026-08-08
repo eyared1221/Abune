@@ -23,6 +23,7 @@ export class CanonNotFoundError extends Error {
 
 const childNameSql = `
   COALESCE(
+    NULLIF(u.name, ''),
     NULLIF(to_jsonb(sc)->>'legal_name', ''),
     NULLIF(to_jsonb(sc)->>'legalName', ''),
     NULLIF(to_jsonb(sc)->>'baptismal_name', ''),
@@ -64,14 +65,16 @@ export async function listCanonsForFather(
         ) AS tasks,
         c.created_at AS "createdAt"
       FROM canons AS c
-      INNER JOIN spiritual_children AS sc
+      LEFT JOIN "user" AS u
+        ON u.id = c.child_user_id
+      LEFT JOIN spiritual_children AS sc
         ON sc.id = c.spiritual_child_id
       INNER JOIN appointments AS a
         ON a.id = c.appointment_id
       LEFT JOIN canon_tasks AS ct
         ON ct.canon_id = c.id
       WHERE c.father_user_id = $1
-      GROUP BY c.id, sc.id, a.id
+      GROUP BY c.id, u.id, sc.id, a.id
       ORDER BY c.created_at DESC
     `,
     [fatherUserId],
@@ -95,10 +98,13 @@ export async function createCanonForFather({
   try {
     await client.query("BEGIN");
     const appointmentResult = await client.query<{
-      spiritualChildId: string;
+      childUserId: string | null;
+      spiritualChildId: string | null;
     }>(
       `
-        SELECT spiritual_child_id AS "spiritualChildId"
+        SELECT
+          child_user_id AS "childUserId",
+          spiritual_child_id AS "spiritualChildId"
         FROM appointments
         WHERE id = $1
           AND father_user_id = $2
@@ -118,18 +124,20 @@ export async function createCanonForFather({
         INSERT INTO canons (
           father_user_id,
           spiritual_child_id,
+          child_user_id,
           appointment_id,
           fetha_date,
           fetha_time,
           created_at,
           updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
         RETURNING id
       `,
       [
         fatherUserId,
         appointment.spiritualChildId,
+        appointment.childUserId,
         input.appointmentId,
         input.fethaDate,
         input.fethaTime,

@@ -68,7 +68,7 @@ const primaryNavigation: NavItem[] = [
     match: ["/father/requests"],
   },
   {
-    label: "Confessions",
+    label: "Spiritual Guidance",
     href: "/confessions",
     icon: BookHeart,
     match: ["/confessions"],

@@ -1,0 +1,92 @@
+.spiritual-page {
+  min-height: calc(100dvh - 8.75rem);
+  background: #fffaf0;
+}
+
+.spiritual-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border-bottom: 1px solid #dfcea4;
+  padding: 0 .95rem;
+  background: #fffdf8;
+}
+
+.spiritual-tabs button {
+  position: relative;
+  border: 0;
+  background: transparent;
+  padding: 1.25rem .5rem 1.1rem;
+  color: #9296a3;
+  font: 500 1.05rem system-ui, sans-serif;
+}
+
+.spiritual-tabs button.active {
+  color: #132b59;
+  font-weight: 800;
+}
+
+.spiritual-tabs button.active::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #132b59;
+  content: "";
+}
+
+.spiritual-empty-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.85rem 1.5rem;
+  border: 1px solid #dfcea4;
+  border-radius: 1.35rem;
+  background: #fffefb;
+  box-shadow: 0 .45rem 1rem rgba(94, 69, 23, .11);
+  padding: 1.25rem;
+}
+
+.spiritual-canon-list { padding: .1rem 0; }
+.spiritual-state { margin: 2rem 1.5rem; color: #77839b; text-align: center; }
+.spiritual-canon-card {
+  display: flex;
+  gap: 1rem;
+  margin: 1.4rem 1.5rem;
+  border: 1px solid #dfcea4;
+  border-radius: 1.35rem;
+  background: #fffefb;
+  box-shadow: 0 .45rem 1rem rgba(94, 69, 23, .11);
+  padding: 1.15rem;
+}
+.spiritual-canon-card > span {
+  display: grid;
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 1px solid #eadfc7;
+  border-radius: 50%;
+  background: #fff9eb;
+  color: #b38a2d;
+}
+.spiritual-canon-card svg { width: 1.45rem; height: 1.45rem; }
+.spiritual-canon-card > div { min-width: 0; }
+.spiritual-canon-card h1 { margin: .15rem 0 .5rem; color: #152c57; font-size: 1.05rem; }
+.spiritual-canon-card ul { margin: 0; padding-left: 1.1rem; color: #a5761d; font-size: .9rem; font-weight: 600; line-height: 1.55; }
+
+.spiritual-empty-card > span {
+  display: grid;
+  flex: 0 0 auto;
+  width: 3.65rem;
+  height: 3.65rem;
+  place-items: center;
+  border: 1px solid #eadfc7;
+  border-radius: 50%;
+  background: #fff9eb;
+  color: #b38a2d;
+}
+
+.spiritual-empty-card svg { width: 1.65rem; height: 1.65rem; }
+.spiritual-empty-card h1 { margin: 0; color: #152c57; font-size: 1.05rem; }
+.spiritual-empty-card p { margin: .35rem 0 0; color: #77839b; font-size: .9rem; line-height: 1.35; }

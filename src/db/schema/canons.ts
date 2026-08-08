@@ -18,8 +18,9 @@ export const canons = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     fatherUserId: text("father_user_id").notNull(),
     spiritualChildId: uuid("spiritual_child_id")
-      .notNull()
       .references(() => spiritualChildren.id, { onDelete: "cascade" }),
+    // New mobile appointments belong directly to the authenticated user.
+    childUserId: text("child_user_id"),
     appointmentId: uuid("appointment_id")
       .notNull()
       .references(() => appointments.id, { onDelete: "cascade" }),
@@ -35,6 +36,7 @@ export const canons = pgTable(
   (table) => [
     index("canons_father_idx").on(table.fatherUserId),
     index("canons_child_idx").on(table.spiritualChildId),
+    index("canons_child_user_idx").on(table.childUserId),
     index("canons_appointment_idx").on(table.appointmentId),
   ],
 );

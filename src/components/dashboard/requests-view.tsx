@@ -627,8 +627,8 @@ export function RequestsView() {
                           <p className="truncate text-[17px] font-extrabold text-[#1d2859]">
                             {request.childName}
                           </p>
-                          <p className="mt-1 truncate text-sm font-medium text-[#8992a7]">
-                            {request.requestMessage ||
+                          <p className="mt-1 break-words whitespace-normal text-sm font-medium text-[#8992a7]">
+                            {request.responseNote ||
                               "No message was provided."}
                           </p>
                         </div>

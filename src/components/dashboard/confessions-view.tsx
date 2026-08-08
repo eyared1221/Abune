@@ -293,14 +293,14 @@ export function ConfessionsView() {
     },
     {
       icon: CalendarCheck2,
-      label: "Upcoming Confessions",
+      label: "Upcoming",
       value: confessionAppointments.filter(
         (appointment) => appointment.status === "CONFIRMED",
       ).length,
     },
     {
       icon: CheckCircle2,
-      label: "Confessions Completed",
+      label: "Completed",
       value: confessionAppointments.filter(
         (appointment) => appointment.status === "COMPLETED",
       ).length,
@@ -445,7 +445,7 @@ export function ConfessionsView() {
 
             <div className="mt-6 overflow-x-auto border border-[#ebe5d9]">
               <div className="min-w-[900px]">
-                <div className="grid grid-cols-[1.7fr_1.1fr_1fr_130px_120px] items-center gap-6 border-b border-[#eee9df] bg-[#faf8f3] px-7 py-4 text-[14px] font-extrabold uppercase tracking-[0.06em] text-[#7b8499]">
+                <div className="grid grid-cols-[minmax(320px,1fr)_150px_150px_110px_80px] items-center gap-2 border-b border-[#eee9df] bg-[#faf8f3] px-7 py-4 text-[14px] font-extrabold uppercase tracking-[0.06em] text-[#7b8499]">
                   <p>Confession Request / Canon</p>
                   <p>Scheduled For</p>
                   <p>Requested On</p>
@@ -466,14 +466,14 @@ export function ConfessionsView() {
                     visibleRows.map((row) => (
                       <div
                         key={row.id}
-                        className="grid grid-cols-[1.7fr_1.1fr_1fr_130px_120px] items-center gap-6 px-7 py-5 transition-colors hover:bg-[#fcfaf6]"
+                        className="grid grid-cols-[minmax(320px,1fr)_150px_150px_110px_80px] items-center gap-2 px-7 py-5 transition-colors hover:bg-[#fcfaf6]"
                       >
                         <div className="flex min-w-0 items-center">
                           <div className="min-w-0">
                             <p className="truncate font-extrabold text-[#1d2859]">{row.childName}</p>
-                            <p className="mt-1 text-sm font-medium text-[#7b8499]">{row.childPhone ?? "No phone number"}</p>
+                            {row.childPhone ? <p className="mt-1 text-sm font-medium text-[#7b8499]">{row.childPhone}</p> : null}
                             {row.guidance.length ? (
-                              <p className="mt-1 truncate text-sm font-semibold text-[#9b7525]">
+                              <p className="mt-1 break-words whitespace-normal text-sm font-semibold text-[#9b7525]">
                                 Canon: {row.guidance.join(" · ")}
                               </p>
                             ) : null}
@@ -533,7 +533,7 @@ export function ConfessionsView() {
 
             <div className="mt-5"><div className="flex items-center justify-between gap-3"><p className="text-sm font-bold text-[#33415f]">Canon guidance checklist</p><button className="flex items-center gap-1 text-sm font-bold text-[#9b7525] hover:text-[#7d5d1d]" onClick={() => setEditTasks((tasks) => [...tasks, { id: `task-${Date.now()}-${tasks.length}`, isSelected: true, guidance: "" }])} type="button"><Plus className="h-4 w-4" />Add item</button></div><p className="mt-1 text-sm text-[#7d89a3]">Check each guidance item you want to save for the child.</p><div className="mt-3 space-y-2">{editTasks.map((task) => <div key={task.id} className="flex items-center gap-3 rounded-xl border border-[#e4e0d8] bg-white px-3 py-2"><input aria-label="Include guidance item" checked={task.isSelected} className="h-4 w-4 accent-[#b99645]" onChange={(event) => setEditTasks((tasks) => tasks.map((item) => item.id === task.id ? { ...item, isSelected: event.target.checked } : item))} type="checkbox" /><input className="min-w-0 flex-1 bg-transparent py-1 text-sm font-medium text-[#253252] outline-none placeholder:text-[#9ba4b6]" onChange={(event) => setEditTasks((tasks) => tasks.map((item) => item.id === task.id ? { ...item, guidance: event.target.value } : item))} placeholder="Add the father’s guidance for the child..." value={task.guidance} />{editTasks.length > 1 ? <button aria-label="Remove guidance item" className="text-[#9ba4b6] hover:text-[#cf4f48]" onClick={() => setEditTasks((tasks) => tasks.filter((item) => item.id !== task.id))} type="button"><X className="h-4 w-4" /></button> : null}</div>)}</div></div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2"><label className="text-sm font-bold text-[#33415f]">Fetha date<input className="mt-2 h-11 w-full rounded-[12px] border border-[#e4e0d8] px-3 text-sm font-medium text-[#253252] outline-none focus:border-[#c5a860]" onChange={(event) => setEditFethaDate(event.target.value)} type="date" value={editFethaDate} /></label><label className="text-sm font-bold text-[#33415f]">Fetha time<input className="mt-2 h-11 w-full rounded-[12px] border border-[#e4e0d8] px-3 text-sm font-medium text-[#253252] outline-none focus:border-[#c5a860]" onChange={(event) => setEditFethaTime(event.target.value)} type="time" value={editFethaTime} /></label></div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2"><label className="text-sm font-bold text-[#33415f]">Date<input className="mt-2 h-11 w-full rounded-[12px] border border-[#e4e0d8] px-3 text-sm font-medium text-[#253252] outline-none focus:border-[#c5a860]" onChange={(event) => setEditFethaDate(event.target.value)} type="date" value={editFethaDate} /></label><label className="text-sm font-bold text-[#33415f]">Time<input className="mt-2 h-11 w-full rounded-[12px] border border-[#e4e0d8] px-3 text-sm font-medium text-[#253252] outline-none focus:border-[#c5a860]" onChange={(event) => setEditFethaTime(event.target.value)} type="time" value={editFethaTime} /></label></div>
             {editError ? <p className="mt-3 text-sm font-semibold text-[#b7443e]">{editError}</p> : null}
             <div className="mt-6 flex gap-3"><button className="h-11 flex-1 rounded-[12px] border border-[#ded8cd] bg-white px-4 text-sm font-bold text-[#56627c] hover:bg-[#faf8f4] disabled:opacity-50" disabled={isSavingEdit} onClick={closeEditCanon} type="button">Cancel</button><button className="h-11 flex-1 rounded-[12px] bg-[#b99645] px-4 text-sm font-bold text-white hover:bg-[#a78336] disabled:opacity-60" disabled={isSavingEdit} onClick={() => void saveEditedCanon()} type="button">{isSavingEdit ? "Saving..." : "Save Canon"}</button></div>
           </div>
