@@ -1,6 +1,6 @@
 import { ArrowLeft, Plus, Save, Trash2, Users } from "lucide-react";
 import { useState, type FormEvent, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import "./completeProfilePage.css";
 
@@ -28,6 +28,7 @@ function readDraft() {
 
 export function CompleteProfilePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [draft] = useState(readDraft);
   const [values, setValues] = useState<Values>(draft.values);
   const [children, setChildren] = useState<Child[]>(draft.children);
@@ -42,7 +43,7 @@ export function CompleteProfilePage() {
   const updateChild = (id: number, name: keyof Omit<Child, "id">, value: string) => setChildren((current) => current.map((child) => child.id === id ? { ...child, [name]: value } : child));
 
   return <form className="complete-profile-page" onSubmit={submit}>
-    <button aria-label="Back to More" className="complete-profile-back" onClick={() => navigate("/child/more")} type="button"><ArrowLeft /></button>
+    <button aria-label="Back" className="complete-profile-back" onClick={() => navigate(location.state?.fromHome ? "/child" : "/child/more")} type="button"><ArrowLeft /></button>
     <div className="profile-heading"><div className="profile-cross">✝</div><div><h1>Add Spiritual Child</h1><p>Register a new spiritual child under your guidance.</p></div></div>
     <ProfileSection title="1. General & Educational Profile"><div className="profile-grid">
       <Field label="Baptismal (Christian) Name" name="baptismalName" placeholder="Enter baptismal name" required update={update} values={values} />
